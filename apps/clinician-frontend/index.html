@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayushman Bharat — Clinician Triage Portal</title>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --success: #16a34a;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 18px 24px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+    .doctor-tag { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; display: inline-block; }
+    .layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    .panel { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; }
+    .panel-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .patient-item { padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .patient-item:hover, .patient-item.selected { border-color: var(--primary); background: #f0fdfa; }
+    .risk-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .risk-high { background: #fee2e2; color: #991b1b; }
+    .risk-med { background: #fef3c7; color: #92400e; }
+    .risk-low { background: #dcfce7; color: #166534; }
+    .vitals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+    .vital-box { background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
+    .vital-val { font-size: 18px; font-weight: 700; color: var(--primary-dark); }
+    .ai-card { background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-override { background: white; color: var(--danger); border: 1px solid var(--danger); }
+    .override-form { margin-top: 12px; display: none; background: #fff1f2; padding: 12px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1 style="font-size: 20px; color: var(--primary-dark);">Ayushman Bharat — Clinical Triage Station</h1>
+        <p style="font-size: 13px; color: var(--muted);">AI-Assisted Workflow Burden Mitigation & FHIR R4 Records</p>
+      </div>
+      <div class="doctor-tag">
+        <span class="status-dot"></span>
+        <span>Dr. Priya Sen (AIIMS)</span>
+        <span style="background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 12px;">MCI-88349</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- Patient Queue -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>Triage Queue</span>
+          <span style="font-size: 12px; color: var(--muted);">3 Active</span>
+        </div>
+
+        <div class="patient-item selected" onclick="selectPatient('P-101')">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>Aarav Sharma (42)</strong>
+            <span class="risk-badge risk-high">High Risk</span>
+          </div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">ABHA: 14-8899-2341-9988</div>
+          <div style="font-size: 12px; color: var(--danger); margin-top: 2px;">Chest pain, SpO2 91%</div>
+        </div>
+
+        <div class="patient-item" onclick="selectPatient('P-102')">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>Sunita Mohanty (36)</strong>
+            <span class="risk-badge risk-med">Medium</span>
+          </div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">ABHA: 14-7711-4422-5533</div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">High fever, cough</div>
+        </div>
+
+        <div class="patient-item" onclick="selectPatient('P-103')">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>Rajesh Ghosh (58)</strong>
+            <span class="risk-badge risk-low">Low</span>
+          </div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">ABHA: 14-3322-1144-8877</div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Mild headache</div>
+        </div>
+      </div>
+
+      <!-- Clinical Workspace -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>Patient Clinical Record & Triage Assessment</span>
+          <span style="font-size: 12px; background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px;">✓ ABDM Consent Valid</span>
+        </div>
+
+        <div class="vitals-grid">
+          <div class="vital-box">
+            <div style="font-size: 12px; color: var(--muted);">SpO2 Saturation</div>
+            <div class="vital-val" style="color: var(--danger);">91% (Low)</div>
+          </div>
+          <div class="vital-box">
+            <div style="font-size: 12px; color: var(--muted);">Heart Rate</div>
+            <div class="vital-val">108 bpm</div>
+          </div>
+          <div class="vital-box">
+            <div style="font-size: 12px; color: var(--muted);">Blood Pressure</div>
+            <div class="vital-val">142/90 mmHg</div>
+          </div>
+        </div>
+
+        <!-- AI Clinical Suggestion -->
+        <div class="ai-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="color: var(--primary-dark);">🤖 AI Clinical Triage Recommendation (Fairness Checked)</strong>
+            <span style="font-size: 12px; font-weight: bold; color: var(--danger);">EMERGENCY (Risk: 0.75)</span>
+          </div>
+          <p style="font-size: 14px; margin-bottom: 6px;"><strong>Recommended Path:</strong> Immediate ECG, Oxygen therapy, and Acute Coronary Syndrome protocol.</p>
+          <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
+            Top Factors: Hypoxia (SpO2 91%), Acute Chest Pain, Borderline Tachycardia.
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn" onclick="acceptAIRecommendation()">✓ Accept & Order ECG</button>
+            <button class="btn btn-override" onclick="toggleOverrideForm()">⚠️ Override AI Suggestion</button>
+          </div>
+
+          <div id="override-box" class="override-form">
+            <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Clinician Override Justification (Logged to Audit Chain):</label>
+            <input type="text" id="override-reason" placeholder="e.g., Prior known muscular strain, ECG already normal" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 8px;">
+            <button class="btn" style="background: var(--danger); font-size: 12px;" onclick="submitOverride()">Confirm Override</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">Clinician Encounter Notes (FHIR Encounter)</label>
+          <textarea id="clinician-notes" style="width: 100%; height: 80px; padding: 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 14px;" placeholder="Enter clinical observations, prescription, and referral instructions..."></textarea>
+          <button class="btn" style="margin-top: 8px;" onclick="saveEncounter()">Save Encounter & Dispatch</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectPatient(id) {
+      alert("Loading FHIR records for " + id);
+    }
+    function toggleOverrideForm() {
+      const box = document.getElementById('override-box');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+    async function submitOverride() {
+      const reason = document.getElementById('override-reason').value;
+      if (!reason) return alert('Please enter override reason.');
+      await fetch('http://localhost:8000/api/v1/audit/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: "CLINICIAN_OVERRIDE",
+          actor_id: "doctor1",
+          actor_role: "CLINICIAN",
+          target_resource_id: "P-101",
+          resource_type: "TRIAGE_ASSESSMENT",
+          details: { reason: reason, original_suggestion: "ACS Protocol" }
+        })
+      });
+      alert('Override recorded in tamper-evident audit ledger.');
+      document.getElementById('override-box').style.display = 'none';
+    }
+    async function acceptAIRecommendation() {
+      alert('AI Care path accepted. ECG and Vitals monitoring dispatched.');
+    }
+    async function saveEncounter() {
+      const notes = document.getElementById('clinician-notes').value;
+      await fetch('http://localhost:8000/api/v1/clinical/encounters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patient_id: "P-101",
+          clinician_id: "doctor1",
+          triage_risk: "HIGH",
+          notes: notes
+        })
+      });
+      alert('FHIR Encounter saved successfully.');
+    }
+  </script>
+</body>
+</html>

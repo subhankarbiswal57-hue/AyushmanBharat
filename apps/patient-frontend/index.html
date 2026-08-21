@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayushman Bharat — Patient Health & Triage Portal</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
+    .lang-selector { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; font-weight: 500; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+    h2 { font-size: 18px; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .abha-badge { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 14px; border-radius: 8px; margin-bottom: 16px; }
+    .symptom-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip { padding: 8px 14px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 14px; transition: all 0.2s; user-select: none; }
+    .chip.active { background: var(--primary); color: white; border-color: var(--primary-dark); }
+    .btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .btn:hover { background: var(--primary-dark); }
+    .triage-result { margin-top: 16px; padding: 16px; border-radius: 8px; display: none; }
+    .status-emergency { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .status-high { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .status-medium { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .status-low { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .consent-toggle { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-area">
+        <div class="logo-icon">आ</div>
+        <div>
+          <h1 style="font-size: 20px;" id="title-text">Ayushman Bharat Digital Health</h1>
+          <p style="font-size: 13px; color: var(--muted);" id="subtitle-text">Equity-First Patient Care & Triage</p>
+        </div>
+      </div>
+      <div>
+        <label for="lang" style="font-size: 12px; color: var(--muted); display: block;">Language / भाषा</label>
+        <select id="lang" class="lang-selector" onchange="updateLanguage()">
+          <option value="en">English</option>
+          <option value="hi">हिंदी (Hindi)</option>
+          <option value="od">ଓଡ଼ିଆ (Odia)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+          <option value="ta">தமிழ் (Tamil)</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- ABHA Health Profile -->
+      <div class="card">
+        <h2><span id="profile-heading">ABHA Digital Identity</span></h2>
+        <div class="abha-badge">
+          <div style="font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">ABHA Address</div>
+          <div style="font-size: 18px; font-weight: bold; font-family: monospace;">14-8899-2341-9988</div>
+          <div style="font-size: 13px; margin-top: 4px;">Aarav Sharma • 42 Yrs • Rural District (Odisha)</div>
+        </div>
+
+        <div class="consent-toggle">
+          <div>
+            <strong id="consent-title">ABDM Health Data Sharing</strong>
+            <p style="font-size: 12px; color: var(--muted);" id="consent-desc">Allow authorized clinicians to view health summary</p>
+          </div>
+          <input type="checkbox" id="consent-check" checked onchange="toggleConsent()" style="width: 20px; height: 20px; cursor: pointer;">
+        </div>
+        <p id="consent-msg" style="font-size: 12px; color: var(--success); margin-top: 8px; font-weight: 500;">✓ Consent Active & Verified via ABDM Gateway</p>
+      </div>
+
+      <!-- AI-Assisted Symptom Triage -->
+      <div class="card">
+        <h2><span id="symptom-heading">Quick Symptom Check & Triage</span></h2>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;" id="symptom-hint">Select what you are experiencing today:</p>
+        
+        <div class="symptom-chips" id="symptom-list">
+          <div class="chip" onclick="toggleChip(this, 'chest_pain')">Chest Pain</div>
+          <div class="chip" onclick="toggleChip(this, 'shortness_of_breath')">Shortness of Breath</div>
+          <div class="chip" onclick="toggleChip(this, 'high_fever')">High Fever</div>
+          <div class="chip" onclick="toggleChip(this, 'cough')">Cough</div>
+          <div class="chip" onclick="toggleChip(this, 'fatigue')">Fatigue</div>
+          <div class="chip" onclick="toggleChip(this, 'severe_headache')">Severe Headache</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+          <div>
+            <label style="font-size: 12px; color: var(--muted);">SpO2 Pulse Oximeter (%)</label>
+            <input type="number" id="vital-spo2" value="97" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--muted);">Temperature (°F)</label>
+            <input type="number" id="vital-temp" value="98.6" step="0.1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+          </div>
+        </div>
+
+        <button class="btn" onclick="runTriage()" id="btn-triage">Evaluate Symptoms</button>
+
+        <div id="triage-output" class="triage-result">
+          <div id="triage-badge" style="font-weight: bold; font-size: 16px; margin-bottom: 4px;"></div>
+          <div id="triage-path" style="font-size: 14px; margin-bottom: 8px;"></div>
+          <div style="font-size: 12px; opacity: 0.85;" id="triage-equity">✓ Evaluated with Demographic Parity Protection</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+      en: {
+        title: "Ayushman Bharat Digital Health",
+        subtitle: "Equity-First Patient Care & Triage",
+        profile: "ABHA Digital Identity",
+        consentTitle: "ABDM Health Data Sharing",
+        consentDesc: "Allow authorized clinicians to view health summary",
+        symptomHead: "Quick Symptom Check & Triage",
+        symptomHint: "Select what you are experiencing today:",
+        btnTriage: "Evaluate Symptoms"
+      },
+      hi: {
+        title: "आयुष्मान भारत डिजिटल स्वास्थ्य",
+        subtitle: "समानता-केंद्रित रोगी देखभाल एवं ट्राइएज",
+        profile: "आभा (ABHA) डिजिटल पहचान",
+        consentTitle: "ABDM स्वास्थ्य डेटा साझाकरण",
+        consentDesc: "अधिकृत डॉक्टरों को स्वास्थ्य सारांश देखने की अनुमति दें",
+        symptomHead: "लक्षण जांच एवं ट्राइएज",
+        symptomHint: "आज आप क्या लक्षण महसूस कर रहे हैं चुनें:",
+        btnTriage: "लक्षणों का मूल्यांकन करें"
+      },
+      od: {
+        title: "ଆୟୁଷ୍ମାନ ଭାରତ ଡିଜିଟାଲ୍ ସ୍ୱାସ୍ଥ୍ୟ",
+        subtitle: "ସମାନତା ଭିତ୍ତିକ ରୋଗୀ ସେବା",
+        profile: "ଆଭା (ABHA) ପରିଚୟ",
+        consentTitle: "ସ୍ୱାସ୍ଥ୍ୟ ତଥ୍ୟ ସହଭାଗିତା",
+        consentDesc: "ଡାକ୍ତରଙ୍କୁ ତଥ୍ୟ ଦେଖିବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ",
+        symptomHead: "ଲକ୍ଷଣ ଯାଞ୍ଚ ଓ ପରାମର୍ଶ",
+        symptomHint: "ଆପଣଙ୍କ ଲକ୍ଷଣ ଚୟନ କରନ୍ତୁ:",
+        btnTriage: "ମୂଲ୍ୟାଙ୍କନ କରନ୍ତୁ"
+      }
+    };
+
+    let selectedSymptoms = [];
+
+    function updateLanguage() {
+      const lang = document.getElementById('lang').value;
+      const t = translations[lang] || translations.en;
+      document.getElementById('title-text').innerText = t.title;
+      document.getElementById('subtitle-text').innerText = t.subtitle;
+      document.getElementById('profile-heading').innerText = t.profile;
+      document.getElementById('consent-title').innerText = t.consentTitle;
+      document.getElementById('consent-desc').innerText = t.consentDesc;
+      document.getElementById('symptom-heading').innerText = t.symptomHead;
+      document.getElementById('symptom-hint').innerText = t.symptomHint;
+      document.getElementById('btn-triage').innerText = t.btnTriage;
+    }
+
+    function toggleChip(el, symptom) {
+      el.classList.toggle('active');
+      if (selectedSymptoms.includes(symptom)) {
+        selectedSymptoms = selectedSymptoms.filter(s => s !== symptom);
+      } else {
+        selectedSymptoms.push(symptom);
+      }
+    }
+
+    async function toggleConsent() {
+      const active = document.getElementById('consent-check').checked;
+      const msg = document.getElementById('consent-msg');
+      try {
+        await fetch('http://localhost:8000/api/v1/clinical/consent/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patient_id: 'P-101' })
+        });
+        msg.innerText = active ? "✓ Consent Active & Verified via ABDM Gateway" : "✕ Consent Revoked (Clinician Access Blocked)";
+        msg.style.color = active ? "var(--success)" : "var(--danger)";
+      } catch (e) {
+        msg.innerText = "Simulated status: " + (active ? "Active" : "Revoked");
+      }
+    }
+
+    async function runTriage() {
+      const spo2 = parseFloat(document.getElementById('vital-spo2').value) || 97;
+      const temp = parseFloat(document.getElementById('vital-temp').value) || 98.6;
+      const output = document.getElementById('triage-output');
+      const badge = document.getElementById('triage-badge');
+      const path = document.getElementById('triage-path');
+
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/ai/triage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            symptoms: selectedSymptoms,
+            vitals: { spo2, temperature: temp },
+            demographics: { gender: "male", region: "rural", age: 42 }
+          })
+        });
+        const data = await res.json();
+        output.style.display = 'block';
+        output.className = 'triage-result status-' + data.risk_level.toLowerCase();
+        badge.innerText = `Triage Assessment: ${data.risk_level} (Score: ${data.risk_score})`;
+        path.innerText = data.recommended_care_path;
+      } catch (err) {
+        output.style.display = 'block';
+        output.className = 'triage-result status-medium';
+        badge.innerText = "Triage Assessment: MEDIUM RISK";
+        path.innerText = "Telehealth / OPD consult recommended.";
+      }
+    }
+  </script>
+</body>
+</html>

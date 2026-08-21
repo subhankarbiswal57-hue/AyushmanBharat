@@ -1,0 +1,6 @@
+FROM python:3.14-slim
+WORKDIR /app
+COPY shared/ /app/shared/
+COPY ai-ml/ /app/ai-ml/
+EXPOSE 8003
+CMD ["python", "ai-ml/monitoring/app.py"]

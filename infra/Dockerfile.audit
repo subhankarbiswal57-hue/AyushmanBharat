@@ -1,0 +1,6 @@
+FROM python:3.14-slim
+WORKDIR /app
+COPY shared/ /app/shared/
+COPY services/audit-logging/ /app/services/audit-logging/
+EXPOSE 8004
+CMD ["python", "services/audit-logging/main.py"]

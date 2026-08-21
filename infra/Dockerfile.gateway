@@ -1,0 +1,6 @@
+FROM python:3.14-slim
+WORKDIR /app
+COPY shared/ /app/shared/
+COPY services/api-gateway/ /app/services/api-gateway/
+EXPOSE 8000
+CMD ["python", "services/api-gateway/main.py"]
