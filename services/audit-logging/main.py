@@ -12,19 +12,36 @@ from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-AUDIT_CHAIN = []
+from shared.db import get_db_connection, init_database
+
+init_database()
+
 GENESIS_HASH = "0" * 64
 
 def calculate_hash(record: dict) -> str:
     serialized = f"{record['event_id']}|{record['timestamp']}|{record['action']}|{record['actor_id']}|{record['actor_role']}|{record['target_resource_id']}|{json.dumps(record['details'], sort_keys=True)}|{record['prev_hash']}"
     return hashlib.sha256(serialized.encode()).hexdigest()
 
+def get_latest_audit_hash() -> str:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT record_hash FROM audit_ledger ORDER BY id DESC LIMIT 1")
+    row = cursor.fetchone()
+    conn.close()
+    return row["record_hash"] if row else GENESIS_HASH
+
 def append_audit_event(action: str, actor_id: str, actor_role: str, target_resource_id: str, resource_type: str, details: dict) -> dict:
-    prev_hash = AUDIT_CHAIN[-1]["record_hash"] if AUDIT_CHAIN else GENESIS_HASH
-    event_id = f"EVT-{int(time.time()*1000)}-{len(AUDIT_CHAIN)+1}"
+    prev_hash = get_latest_audit_hash()
+    now = time.time()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM audit_ledger")
+    count = cursor.fetchone()[0]
+    event_id = f"EVT-{int(now*1000)}-{count + 1}"
+    
     record = {
         "event_id": event_id,
-        "timestamp": time.time(),
+        "timestamp": now,
         "action": action,
         "actor_id": actor_id,
         "actor_role": actor_role,
@@ -34,12 +51,62 @@ def append_audit_event(action: str, actor_id: str, actor_role: str, target_resou
         "prev_hash": prev_hash
     }
     record["record_hash"] = calculate_hash(record)
-    AUDIT_CHAIN.append(record)
+    
+    cursor.execute("""
+        INSERT INTO audit_ledger (event_id, timestamp, action, actor_id, actor_role, target_resource_id, resource_type, details, prev_hash, record_hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        record["event_id"],
+        record["timestamp"],
+        record["action"],
+        record["actor_id"],
+        record["actor_role"],
+        record["target_resource_id"],
+        record["resource_type"],
+        json.dumps(record["details"], sort_keys=True),
+        record["prev_hash"],
+        record["record_hash"]
+    ))
+    conn.commit()
+    conn.close()
     return record
 
-append_audit_event("SYSTEM_BOOT", "system", "SYSTEM", "core", "SYSTEM", {"note": "Audit log ledger initialized"})
-append_audit_event("CONSENT_GRANTED", "patient1", "PATIENT", "14-8899-2341-9988", "ABHA_CONSENT", {"scope": "EHR_READ_WRITE", "validity_days": 365})
-append_audit_event("AI_BIAS_AUDIT", "ai-engine", "AI_SERVICE", "triage-v1", "MODEL_AUDIT", {"demographic_parity_ratio": 0.94, "fairness_status": "COMPLIANT"})
+def get_audit_records(limit=50):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM audit_ledger ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    records = []
+    for r in rows:
+        d = dict(r)
+        d["details"] = json.loads(d.get("details") or "{}")
+        records.append(d)
+    return records
+
+def verify_audit_ledger_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM audit_ledger ORDER BY id ASC")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    is_valid = True
+    invalid_indices = []
+    prev = GENESIS_HASH
+    for i, r in enumerate(rows):
+        rec = dict(r)
+        rec["details"] = json.loads(rec.get("details") or "{}")
+        if rec["prev_hash"] != prev or rec["record_hash"] != calculate_hash(rec):
+            is_valid = False
+            invalid_indices.append(i)
+        prev = rec["record_hash"]
+        
+    return {
+        "ledger_valid": is_valid,
+        "chain_length": len(rows),
+        "tampered_records": invalid_indices
+    }
 
 class AuditHandler(BaseHTTPRequestHandler):
     def _send_json(self, status: int, data: dict):
@@ -71,27 +138,28 @@ class AuditHandler(BaseHTTPRequestHandler):
             return self._send_json(201, {"message": "Audit event recorded", "event": event})
 
         elif parsed.path == "/audit/verify":
-            is_valid = True
-            invalid_indices = []
-            for i, record in enumerate(AUDIT_CHAIN):
-                expected_prev = AUDIT_CHAIN[i-1]["record_hash"] if i > 0 else GENESIS_HASH
-                if record["prev_hash"] != expected_prev or record["record_hash"] != calculate_hash(record):
-                    is_valid = False
-                    invalid_indices.append(i)
-            return self._send_json(200, {
-                "ledger_valid": is_valid,
-                "chain_length": len(AUDIT_CHAIN),
-                "tampered_records": invalid_indices
-            })
+            verification = verify_audit_ledger_db()
+            return self._send_json(200, verification)
 
         self._send_json(404, {"error": "Not Found"})
 
     def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path == "/health":
-            return self._send_json(200, {"service": "audit-logging", "status": "healthy", "chain_length": len(AUDIT_CHAIN)})
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM audit_ledger")
+            count = cursor.fetchone()[0]
+            conn.close()
+            return self._send_json(200, {"service": "audit-logging", "status": "healthy", "chain_length": count})
         elif parsed.path == "/audit/events":
-            return self._send_json(200, {"events": list(reversed(AUDIT_CHAIN[-50:])), "total": len(AUDIT_CHAIN)})
+            records = get_audit_records(limit=50)
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM audit_ledger")
+            count = cursor.fetchone()[0]
+            conn.close()
+            return self._send_json(200, {"events": records, "total": count})
         self._send_json(404, {"error": "Not Found"})
 
 def run_server(port=8004):

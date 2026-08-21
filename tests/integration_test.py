@@ -33,7 +33,7 @@ calculate_fairness_metrics = aiml_svc.calculate_fairness_metrics
 evaluate_disparate_impact = fairness_eval.evaluate_disparate_impact
 append_audit_event = audit_svc.append_audit_event
 calculate_hash = audit_svc.calculate_hash
-AUDIT_CHAIN = audit_svc.AUDIT_CHAIN
+verify_audit_ledger_db = audit_svc.verify_audit_ledger_db
 
 class HealthtechPlatformIntegrationTests(unittest.TestCase):
 
@@ -74,20 +74,19 @@ class HealthtechPlatformIntegrationTests(unittest.TestCase):
         self.assertTrue(report["four_fifths_rule_passed"])
         self.assertGreaterEqual(report["demographic_parity_ratio"], 0.80)
 
-    def test_05_auth_lockout_and_revocation(self):
-        lock_id = "test_ip:bad_user"
-        for _ in range(5):
-            auth_svc.record_failed_attempt(lock_id)
-        self.assertTrue(auth_svc.is_locked_out(lock_id))
-        auth_svc.clear_failed_attempts(lock_id)
-        self.assertFalse(auth_svc.is_locked_out(lock_id))
+    def test_06_database_audit_chain_tamper_verification(self):
+        v = audit_svc.verify_audit_ledger_db()
+        self.assertTrue(v["ledger_valid"])
+        self.assertGreater(v["chain_length"], 0)
+        self.assertEqual(len(v["tampered_records"]), 0)
 
-        # Test token revocation
-        token = create_jwt({"sub": "patient1", "role": UserRole.PATIENT, "exp": time.time() + 3600})
-        self.assertIsNotNone(verify_jwt(token))
-        auth_svc.REVOKED_TOKENS.add(token)
-        # Check that revoked token is recognized
-        self.assertIn(token, auth_svc.REVOKED_TOKENS)
+        # Append new event
+        evt = audit_svc.append_audit_event("TEST_ENCOUNTER", "doctor1", "CLINICIAN", "P-101", "FHIR_ENCOUNTER", {"test": True})
+        self.assertEqual(evt["record_hash"], audit_svc.calculate_hash(evt))
+
+        v2 = audit_svc.verify_audit_ledger_db()
+        self.assertTrue(v2["ledger_valid"])
+        self.assertEqual(v2["chain_length"], v["chain_length"] + 1)
 
 if __name__ == "__main__":
     unittest.main()

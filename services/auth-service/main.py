@@ -14,40 +14,31 @@ from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from shared.schemas import UserRole
+from shared.db import get_db_connection, init_database
 
-SECRET_KEY = "ayushman-bharat-secure-production-secret-key"
+init_database()
 
-USERS_DB = {
-    "patient1": {
-        "username": "patient1",
-        "password_hash": hashlib.sha256("patient123".encode()).hexdigest(),
-        "role": UserRole.PATIENT,
-        "full_name": "Aarav Sharma",
-        "abha_id": "14-8899-2341-9988",
-        "region": "rural",
-        "language": "hi"
-    },
-    "doctor1": {
-        "username": "doctor1",
-        "password_hash": hashlib.sha256("doctor123".encode()).hexdigest(),
-        "role": UserRole.CLINICIAN,
-        "full_name": "Dr. Priya Sen",
-        "license_no": "MCI-88349",
-        "hospital": "AIIMS Bhubaneswar"
-    },
-    "admin1": {
-        "username": "admin1",
-        "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
-        "role": UserRole.ADMIN,
-        "full_name": "Ayushman Health Administrator"
-    },
-    "auditor1": {
-        "username": "auditor1",
-        "password_hash": hashlib.sha256("auditor123".encode()).hexdigest(),
-        "role": UserRole.AUDITOR,
-        "full_name": "Independent Ethics & Bias Auditor"
-    }
-}
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "ayushman-bharat-secure-production-secret-key")
+
+def get_user_from_db(username: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return None
+
+def create_user_in_db(username, password_hash, role, full_name, abha_id, region, language):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (username, password_hash, role, full_name, abha_id, region, language, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (username, password_hash, role, full_name, abha_id, region, language, time.time()))
+    conn.commit()
+    conn.close()
 
 def create_jwt(payload: dict) -> str:
     header = {"alg": "HS256", "typ": "JWT"}
@@ -123,7 +114,7 @@ class AuthHandler(BaseHTTPRequestHandler):
             if is_locked_out(lock_id):
                 return self._send_json(429, {"error": "Too many failed attempts. Account temporarily locked for 60 seconds."})
 
-            user = USERS_DB.get(username)
+            user = get_user_from_db(username)
             if not user or user["password_hash"] != hashlib.sha256(password.encode()).hexdigest():
                 record_failed_attempt(lock_id)
                 return self._send_json(401, {"error": "Invalid username or password"})
@@ -169,19 +160,21 @@ class AuthHandler(BaseHTTPRequestHandler):
 
         elif parsed.path == "/auth/register":
             username = body.get("username")
-            if username in USERS_DB:
+            if get_user_from_db(username):
                 return self._send_json(400, {"error": "User already exists"})
             role = body.get("role", UserRole.PATIENT)
-            USERS_DB[username] = {
-                "username": username,
-                "password_hash": hashlib.sha256(body.get("password", "").encode()).hexdigest(),
-                "role": role,
-                "full_name": body.get("full_name", username),
-                "abha_id": body.get("abha_id", f"14-{int(time.time()*100)%9000+1000}-4421-1200"),
-                "region": body.get("region", "rural"),
-                "language": body.get("language", "en")
-            }
-            return self._send_json(201, {"message": "User registered successfully", "user": USERS_DB[username]})
+            abha_id = body.get("abha_id", f"14-{int(time.time()*100)%9000+1000}-4421-1200")
+            create_user_in_db(
+                username=username,
+                password_hash=hashlib.sha256(body.get("password", "").encode()).hexdigest(),
+                role=role,
+                full_name=body.get("full_name", username),
+                abha_id=abha_id,
+                region=body.get("region", "rural"),
+                language=body.get("language", "en")
+            )
+            created_user = get_user_from_db(username)
+            return self._send_json(201, {"message": "User registered successfully", "user": created_user})
 
         elif parsed.path == "/auth/verify":
             token = body.get("token") or self.headers.get("Authorization", "").replace("Bearer ", "")
