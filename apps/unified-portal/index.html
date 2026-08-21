@@ -14,7 +14,6 @@
       --font: 'Inter', system-ui, -apple-system, sans-serif;
       --sidebar-w: 260px;
       --header-h: 64px;
-      /* Dark palette */
       --bg-base: #0b0f1a;
       --bg-sidebar: #0f1425;
       --bg-surface: #151b2e;
@@ -25,7 +24,6 @@
       --text: #e8ecf4;
       --text-muted: #7b8bab;
       --text-dim: #4e5d80;
-      /* Accents */
       --accent-blue: #3b82f6;
       --accent-teal: #14b8a6;
       --accent-violet: #8b5cf6;
@@ -46,6 +44,40 @@
       display: flex;
       min-height: 100vh;
       overflow-x: hidden;
+    }
+
+    /* ===== AUTH MODAL & OVERLAY ===== */
+    .auth-overlay {
+      position: fixed; inset: 0;
+      background: rgba(11, 15, 26, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%; max-width: 440px;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .auth-header { text-align: center; margin-bottom: 24px; }
+    .auth-header .brand-icon { margin: 0 auto 12px; }
+    .auth-tabs {
+      display: flex; gap: 6px; margin-bottom: 20px;
+      background: var(--bg-surface); padding: 4px; border-radius: var(--radius-sm);
+    }
+    .auth-tab-btn {
+      flex: 1; padding: 8px; font-size: 11px; font-weight: 700;
+      background: transparent; color: var(--text-muted); border: none;
+      border-radius: 6px; cursor: pointer; transition: all var(--transition);
+      text-transform: uppercase;
+    }
+    .auth-tab-btn.active {
+      background: var(--accent-blue); color: #fff;
     }
 
     /* ===== SIDEBAR ===== */
@@ -72,7 +104,7 @@
       background: var(--gradient-hero);
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: 800; color: #fff;
+      font-size: 20px; font-weight: 800; color: #fff;
       flex-shrink: 0;
     }
     .brand-text h1 { font-size: 15px; font-weight: 700; line-height: 1.2; }
@@ -90,6 +122,7 @@
       font-size: 14px; font-weight: 500; color: var(--text-muted);
       margin-bottom: 2px; user-select: none;
       border: 1px solid transparent;
+      position: relative;
     }
     .nav-item:hover { background: var(--bg-hover); color: var(--text); }
     .nav-item.active {
@@ -98,9 +131,10 @@
       border-color: rgba(59,130,246,0.2);
       font-weight: 600;
     }
-    .nav-icon {
-      width: 20px; text-align: center; font-size: 16px; flex-shrink: 0;
+    .nav-item.locked {
+      opacity: 0.45; cursor: not-allowed;
     }
+    .nav-icon { width: 20px; text-align: center; font-size: 16px; flex-shrink: 0; }
     .nav-badge {
       margin-left: auto; font-size: 11px; font-weight: 700;
       padding: 2px 7px; border-radius: 10px; background: var(--accent-rose);
@@ -110,6 +144,7 @@
     .sidebar-footer {
       padding: 14px 16px; border-top: 1px solid var(--border);
       font-size: 12px; color: var(--text-dim);
+      display: flex; align-items: center; justify-content: space-between;
     }
     .sidebar-footer .role-tag {
       display: inline-block; padding: 3px 8px; border-radius: 4px;
@@ -218,7 +253,7 @@
     .chip:hover { border-color: var(--accent-blue); color: var(--text); }
     .chip.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
 
-    input[type="number"], input[type="text"], textarea, select {
+    input[type="number"], input[type="text"], input[type="password"], textarea, select {
       background: var(--bg-surface); color: var(--text); border: 1px solid var(--border);
       padding: 9px 12px; border-radius: 6px; font-family: var(--font); font-size: 13px;
       width: 100%; transition: border-color var(--transition);
@@ -295,6 +330,40 @@
 </head>
 <body>
 
+<!-- ===== AUTH MODAL ===== -->
+<div id="auth-modal" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="brand-icon">AB</div>
+      <h2 style="font-size: 18px; font-weight: 700; margin-top: 8px;">Ayushman Bharat</h2>
+      <p style="font-size: 12px; color: var(--text-muted);">Secure Health Identity & Role Gateway</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab-btn active" onclick="setLoginRole('patient1', 'patient123', this)">Patient</button>
+      <button class="auth-tab-btn" onclick="setLoginRole('doctor1', 'doctor123', this)">Clinician</button>
+      <button class="auth-tab-btn" onclick="setLoginRole('auditor1', 'auditor123', this)">Auditor</button>
+      <button class="auth-tab-btn" onclick="setLoginRole('admin1', 'admin123', this)">Admin</button>
+    </div>
+
+    <form onsubmit="handleLogin(event)" style="margin-top: 16px;">
+      <div style="margin-bottom: 12px;">
+        <label class="field-label">Username / ABHA ID</label>
+        <input type="text" id="login-username" value="patient1" required>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label class="field-label">Password</label>
+        <input type="password" id="login-password" value="patient123" required>
+      </div>
+      <div id="login-error" style="display: none; font-size: 12px; color: var(--accent-rose); margin-bottom: 12px; background: rgba(244,63,94,0.1); padding: 8px; border-radius: 6px;"></div>
+      <button type="submit" class="btn btn-primary btn-full" id="btn-login-submit">Sign In to Platform</button>
+    </form>
+    <div style="margin-top: 14px; text-align: center; font-size: 11px; color: var(--text-dim);">
+      ABDM Compliant • Multi-Factor Consent Active
+    </div>
+  </div>
+</div>
+
 <!-- ===== SIDEBAR ===== -->
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -324,8 +393,11 @@
   </nav>
 
   <div class="sidebar-footer">
-    <div>Logged in as <strong id="footer-user">Aarav Sharma</strong></div>
-    <div class="role-tag" id="footer-role" style="background: rgba(59,130,246,0.15); color: var(--accent-blue);">PATIENT</div>
+    <div>
+      <div style="font-weight: 600; color: var(--text);" id="footer-user">Aarav Sharma</div>
+      <div class="role-tag" id="footer-role" style="background: rgba(59,130,246,0.15); color: var(--accent-blue);">PATIENT</div>
+    </div>
+    <button onclick="handleLogout()" title="Logout" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 11px;">Logout</button>
   </div>
 </aside>
 
@@ -358,8 +430,8 @@
           <div class="card-title"><span id="lbl-profile">ABHA Digital Health Identity</span></div>
           <div class="abha-card">
             <div class="abha-label">ABHA Health ID</div>
-            <div class="abha-number">14-8899-2341-9988</div>
-            <div class="abha-name">Aarav Sharma &bull; 42 Yrs &bull; Rural District, Odisha</div>
+            <div class="abha-number" id="card-abha-id">14-8899-2341-9988</div>
+            <div class="abha-name" id="card-patient-name">Aarav Sharma &bull; 42 Yrs &bull; Rural District, Odisha</div>
           </div>
           <div class="consent-row">
             <div>
@@ -420,56 +492,58 @@
         <div class="card" style="max-height: calc(100vh - 140px); overflow-y: auto;">
           <div class="card-title">
             <span>Triage Queue</span>
-            <span class="badge badge-amber">3 Active</span>
+            <span class="badge badge-amber" id="queue-badge">3 Active</span>
           </div>
 
-          <div class="queue-item selected" onclick="selectPatient('P-101', this)">
-            <div class="queue-header">
-              <strong>Aarav Sharma (42)</strong>
-              <span class="badge badge-red">Emergency</span>
+          <div id="patient-queue-list">
+            <div class="queue-item selected" onclick="selectPatient('P-101', this)">
+              <div class="queue-header">
+                <strong>Aarav Sharma (42)</strong>
+                <span class="badge badge-red">Emergency</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ABHA: 14-8899-2341-9988</div>
+              <div style="font-size: 11px; color: var(--accent-rose); margin-top: 2px;">Chest pain, SpO2 91%</div>
             </div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ABHA: 14-8899-2341-9988</div>
-            <div style="font-size: 11px; color: var(--accent-rose); margin-top: 2px;">Chest pain, SpO2 91%</div>
-          </div>
 
-          <div class="queue-item" onclick="selectPatient('P-102', this)">
-            <div class="queue-header">
-              <strong>Sunita Mohanty (36)</strong>
-              <span class="badge badge-amber">Medium</span>
+            <div class="queue-item" onclick="selectPatient('P-102', this)">
+              <div class="queue-header">
+                <strong>Sunita Mohanty (36)</strong>
+                <span class="badge badge-amber">Medium</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ABHA: 14-7711-4422-5533</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">High fever, cough</div>
             </div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ABHA: 14-7711-4422-5533</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">High fever, cough</div>
-          </div>
 
-          <div class="queue-item" onclick="selectPatient('P-103', this)">
-            <div class="queue-header">
-              <strong>Rajesh Ghosh (58)</strong>
-              <span class="badge badge-green">Low</span>
+            <div class="queue-item" onclick="selectPatient('P-103', this)">
+              <div class="queue-header">
+                <strong>Rajesh Ghosh (58)</strong>
+                <span class="badge badge-green">Low</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ABHA: 14-3322-1144-8877</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Mild headache</div>
             </div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ABHA: 14-3322-1144-8877</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Mild headache</div>
           </div>
         </div>
 
         <!-- Clinical Workspace -->
         <div class="card">
           <div class="card-title">
-            <span>Patient Clinical Record & Triage</span>
-            <span class="badge badge-green">ABDM Consent Valid</span>
+            <span id="selected-patient-header">Patient Clinical Record (P-101)</span>
+            <span class="badge badge-green" id="clinician-consent-badge">ABDM Consent Valid</span>
           </div>
 
           <div class="grid-3" style="margin-bottom: 16px;">
             <div class="vital-box">
               <div style="font-size: 11px; color: var(--text-muted);">SpO2</div>
-              <div class="vital-val" style="color: var(--accent-rose);">91%</div>
+              <div class="vital-val" style="color: var(--accent-rose);" id="disp-vital-spo2">91%</div>
             </div>
             <div class="vital-box">
               <div style="font-size: 11px; color: var(--text-muted);">Heart Rate</div>
-              <div class="vital-val" style="color: var(--accent-amber);">108 bpm</div>
+              <div class="vital-val" style="color: var(--accent-amber);" id="disp-vital-hr">108 bpm</div>
             </div>
             <div class="vital-box">
               <div style="font-size: 11px; color: var(--text-muted);">Blood Pressure</div>
-              <div class="vital-val">142/90</div>
+              <div class="vital-val" id="disp-vital-bp">142/90</div>
             </div>
           </div>
 
@@ -477,10 +551,10 @@
           <div class="ai-recommend">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <strong style="color: var(--accent-teal); font-size: 14px;">AI Clinical Triage Recommendation</strong>
-              <span class="badge badge-red">EMERGENCY (0.75)</span>
+              <span class="badge badge-red" id="ai-triage-badge">EMERGENCY (0.75)</span>
             </div>
-            <p style="font-size: 13px; margin-bottom: 6px;"><strong>Care Path:</strong> Immediate ECG, Oxygen therapy, ACS protocol initiation.</p>
-            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Top factors: Hypoxia (SpO2 91%), Acute Chest Pain, Borderline Tachycardia</p>
+            <p style="font-size: 13px; margin-bottom: 6px;" id="ai-care-path"><strong>Care Path:</strong> Immediate ECG, Oxygen therapy, ACS protocol initiation.</p>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;" id="ai-factors">Top factors: Hypoxia (SpO2 91%), Acute Chest Pain, Borderline Tachycardia</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <button class="btn btn-teal" onclick="acceptAI()">Accept & Order ECG</button>
               <button class="btn btn-danger" onclick="showOverride()">Override AI Suggestion</button>
@@ -577,10 +651,124 @@
 
 <script>
   const API = 'http://localhost:8000/api/v1';
+  let CURRENT_SESSION = null;
+  let ACTIVE_PATIENT_ID = 'P-101';
   let selectedSymptoms = [];
 
-  // ===== NAVIGATION =====
+  // Authenticated Fetch wrapper
+  async function authFetch(endpoint, options = {}) {
+    options.headers = options.headers || {};
+    options.headers['Content-Type'] = 'application/json';
+    if (CURRENT_SESSION && CURRENT_SESSION.access_token) {
+      options.headers['Authorization'] = `Bearer ${CURRENT_SESSION.access_token}`;
+    }
+    const response = await fetch(endpoint, options);
+    if (response.status === 401 || response.status === 403) {
+      const err = await response.json().catch(() => ({}));
+      if (err.error && (err.error.includes('Expired') || err.error.includes('Missing'))) {
+        alert('Session expired or unauthorized. Please sign in.');
+        handleLogout();
+      }
+    }
+    return response;
+  }
+
+  // Quick Preset Helper for Login Modal
+  function setLoginRole(u, p, btn) {
+    document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('login-username').value = u;
+    document.getElementById('login-password').value = p;
+  }
+
+  // Login handler
+  async function handleLogin(e) {
+    e.preventDefault();
+    const u = document.getElementById('login-username').value.trim();
+    const p = document.getElementById('login-password').value;
+    const errBox = document.getElementById('login-error');
+    errBox.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errBox.textContent = data.error || 'Authentication failed';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      CURRENT_SESSION = data;
+      // In-memory / session state initialized
+      document.getElementById('auth-modal').style.display = 'none';
+      applyUserSession();
+    } catch(err) {
+      errBox.textContent = 'Unable to reach authentication gateway.';
+      errBox.style.display = 'block';
+    }
+  }
+
+  // Logout handler
+  async function handleLogout() {
+    if (CURRENT_SESSION && CURRENT_SESSION.access_token) {
+      fetch(`${API}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${CURRENT_SESSION.access_token}` }
+      }).catch(()=>{});
+    }
+    CURRENT_SESSION = null;
+    document.getElementById('auth-modal').style.display = 'flex';
+  }
+
+  // Session Application & Route Guarding
+  function applyUserSession() {
+    if (!CURRENT_SESSION) return;
+    const user = CURRENT_SESSION.user;
+    document.getElementById('footer-user').textContent = user.full_name || user.username;
+    document.getElementById('footer-role').textContent = user.role;
+
+    // Apply Route Guards
+    const navPatient = document.getElementById('nav-patient');
+    const navClinician = document.getElementById('nav-clinician');
+    const navAdmin = document.getElementById('nav-admin');
+
+    navClinician.classList.remove('locked');
+    navAdmin.classList.remove('locked');
+
+    if (user.role === 'PATIENT') {
+      navClinician.classList.add('locked');
+      navAdmin.classList.add('locked');
+      navigate('patient');
+      if (user.abha_id) {
+        document.getElementById('card-abha-id').textContent = user.abha_id;
+        document.getElementById('card-patient-name').textContent = `${user.full_name} • Active Session`;
+      }
+    } else if (user.role === 'CLINICIAN') {
+      navAdmin.classList.add('locked');
+      navigate('clinician');
+      loadPatientsQueue();
+    } else if (user.role === 'ADMIN' || user.role === 'AUDITOR') {
+      navigate('admin');
+    }
+  }
+
+  // Navigation with Role Guards
   function navigate(page) {
+    if (!CURRENT_SESSION) return;
+    const role = CURRENT_SESSION.user.role;
+    if (page === 'clinician' && role === 'PATIENT') {
+      alert('Access Denied: Patient role cannot access Clinical Triage.');
+      return;
+    }
+    if (page === 'admin' && (role !== 'ADMIN' && role !== 'AUDITOR')) {
+      alert('Access Denied: Requires Administrator or Auditor role.');
+      return;
+    }
+
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
@@ -589,21 +777,10 @@
     const titles = { patient: 'Patient Health Portal', clinician: 'Clinical Triage Station', admin: 'Governance & Fairness Console' };
     document.getElementById('page-title').textContent = titles[page] || '';
 
-    const users = {
-      patient: { name: 'Aarav Sharma', role: 'PATIENT', color: 'var(--accent-blue)' },
-      clinician: { name: 'Dr. Priya Sen', role: 'CLINICIAN', color: 'var(--accent-teal)' },
-      admin: { name: 'Ethics Auditor', role: 'AUDITOR', color: 'var(--accent-violet)' }
-    };
-    const u = users[page];
-    document.getElementById('footer-user').textContent = u.name;
-    document.getElementById('footer-role').textContent = u.role;
-    document.getElementById('footer-role').style.background = u.color.replace(')', ',0.15)').replace('var(', 'rgba(');
-    document.getElementById('footer-role').style.color = u.color;
-
     if (page === 'admin') { fetchAudit(); fetchFairness(); }
   }
 
-  // ===== PATIENT: LANGUAGE =====
+  // Multilingual Strings
   const T = {
     en: { profile:'ABHA Digital Health Identity', consent:'ABDM Health Data Sharing', consentD:'Allow authorized clinicians to view health summary', symptom:'Quick Symptom Check & Triage', hint:'Select what you are experiencing today:', btn:'Evaluate Symptoms' },
     hi: { profile:'ABHA (आभा) स्वास्थ्य पहचान', consent:'ABDM स्वास्थ्य डेटा साझाकरण', consentD:'अधिकृत डॉक्टरों को स्वास्थ्य सारांश देखने की अनुमति', symptom:'लक्षण जांच एवं ट्राइएज', hint:'आज आप क्या लक्षण महसूस कर रहे हैं:', btn:'लक्षणों का मूल्यांकन करें' },
@@ -611,6 +788,7 @@
     bn: { profile:'ABHA (আভা) স্বাস্থ্য পরিচয়', consent:'স্বাস্থ্য তথ্য ভাগাভাগি', consentD:'চিকিৎসকদের দেখার অনুমতি দিন', symptom:'লক্ষণ পরীক্ষা', hint:'আজ আপনি কী অনুভব করছেন:', btn:'মূল্যায়ন করুন' },
     ta: { profile:'ABHA சுகாதார அடையாளம்', consent:'சுகாதார தகவல் பகிர்வு', consentD:'மருத்துவர்கள் பார்க்க அனுமதி', symptom:'அறிகுறி பரிசோதனை', hint:'இன்று நீங்கள் என்ன உணர்கிறீர்கள்:', btn:'மதிப்பீடு' }
   };
+
   function updateLanguage() {
     const l = document.getElementById('lang-select').value;
     const t = T[l] || T.en;
@@ -622,29 +800,44 @@
     document.getElementById('btn-triage').textContent = t.btn;
   }
 
-  // ===== PATIENT: CONSENT =====
-  function toggleConsent() {
+  // Patient Consent Toggle
+  async function toggleConsent() {
     const on = document.getElementById('consent-toggle').checked;
     const el = document.getElementById('consent-status');
-    fetch(API + '/clinical/consent/toggle', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({patient_id:'P-101'}) }).catch(()=>{});
-    el.textContent = on ? 'Consent Active & Verified via ABDM Gateway' : 'Consent REVOKED (Clinician Access Blocked)';
-    el.style.color = on ? 'var(--accent-green)' : 'var(--accent-rose)';
+    const pId = (CURRENT_SESSION && CURRENT_SESSION.user && CURRENT_SESSION.user.username) ? 'P-101' : ACTIVE_PATIENT_ID;
+    
+    try {
+      await authFetch(API + '/clinical/consent/toggle', {
+        method:'POST',
+        body: JSON.stringify({ patient_id: pId })
+      });
+      el.textContent = on ? 'Consent Active & Verified via ABDM Gateway' : 'Consent REVOKED (Clinician Access Blocked)';
+      el.style.color = on ? 'var(--accent-green)' : 'var(--accent-rose)';
+    } catch(e) {}
   }
 
-  // ===== PATIENT: TRIAGE =====
+  // Patient Triage
   function toggleChip(el, s) {
     el.classList.toggle('active');
     selectedSymptoms = el.classList.contains('active') ? [...selectedSymptoms, s] : selectedSymptoms.filter(x => x !== s);
   }
+
   async function runTriage() {
     const spo2 = parseFloat(document.getElementById('vital-spo2').value) || 97;
     const temp = parseFloat(document.getElementById('vital-temp').value) || 98.6;
     const out = document.getElementById('triage-output');
     try {
-      const r = await fetch(API + '/ai/triage', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ symptoms: selectedSymptoms, vitals: {spo2, temperature: temp}, demographics: {gender:'male', region:'rural', age:42} }) });
+      const r = await authFetch(API + '/ai/triage', {
+        method:'POST',
+        body: JSON.stringify({
+          symptoms: selectedSymptoms,
+          vitals: { spo2, temperature: temp },
+          demographics: { gender: 'male', region: 'rural', age: 42 }
+        })
+      });
       const d = await r.json();
       out.style.display = 'block';
-      out.className = 'triage-result status-' + d.risk_level.toLowerCase();
+      out.className = 'triage-result status-' + (d.risk_level || 'medium').toLowerCase();
       document.getElementById('triage-badge').textContent = 'Triage: ' + d.risk_level + ' (Score: ' + d.risk_score + ')';
       document.getElementById('triage-path').textContent = d.recommended_care_path;
     } catch(e) {
@@ -654,45 +847,116 @@
     }
   }
 
-  // ===== CLINICIAN =====
+  // Clinician Flow & Queue
+  async function loadPatientsQueue() {
+    try {
+      const res = await authFetch(API + '/clinical/patients');
+      if (!res.ok) return;
+      const data = await res.json();
+      const list = document.getElementById('patient-queue-list');
+      if (data.patients && data.patients.length > 0) {
+        list.innerHTML = '';
+        data.patients.forEach((p, idx) => {
+          const item = document.createElement('div');
+          item.className = 'queue-item' + (idx === 0 ? ' selected' : '');
+          item.onclick = () => selectPatient(p.patient_id, item);
+          item.innerHTML = `
+            <div class="queue-header">
+              <strong>${p.name} (${p.age})</strong>
+              <span class="badge ${p.consent_active ? 'badge-green' : 'badge-red'}">${p.consent_active ? 'Active' : 'Revoked'}</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ABHA: ${p.abha_id}</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">${p.active_conditions.join(', ') || 'No known conditions'}</div>
+          `;
+          list.appendChild(item);
+        });
+      }
+    } catch(e) {}
+  }
+
   function selectPatient(id, el) {
+    ACTIVE_PATIENT_ID = id;
     document.querySelectorAll('.queue-item').forEach(q => q.classList.remove('selected'));
     if (el) el.classList.add('selected');
+    document.getElementById('selected-patient-header').textContent = `Patient Clinical Record (${id})`;
   }
+
   function showOverride() {
     const p = document.getElementById('override-panel');
     p.style.display = p.style.display === 'block' ? 'none' : 'block';
   }
+
   async function submitOverride() {
-    const reason = document.getElementById('override-reason').value;
-    if (!reason) return alert('Please enter override reason.');
-    await fetch(API + '/audit/log', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'CLINICIAN_OVERRIDE', actor_id:'doctor1', actor_role:'CLINICIAN', target_resource_id:'P-101', resource_type:'TRIAGE_ASSESSMENT', details:{reason, original_suggestion:'ACS Protocol'} }) }).catch(()=>{});
+    const reason = document.getElementById('override-reason').value.trim();
+    if (!reason) return alert('Please enter override justification.');
+    const actorId = (CURRENT_SESSION && CURRENT_SESSION.user) ? CURRENT_SESSION.user.username : 'doctor1';
+    
+    await authFetch(API + '/audit/log', {
+      method:'POST',
+      body: JSON.stringify({
+        action: 'CLINICIAN_OVERRIDE',
+        actor_id: actorId,
+        actor_role: 'CLINICIAN',
+        target_resource_id: ACTIVE_PATIENT_ID,
+        resource_type: 'TRIAGE_ASSESSMENT',
+        details: { reason, original_suggestion: 'ACS Protocol' }
+      })
+    });
     alert('Override recorded in tamper-evident audit ledger.');
     document.getElementById('override-panel').style.display = 'none';
   }
+
   function acceptAI() { alert('AI Care path accepted. ECG and Vitals monitoring dispatched.'); }
+
   async function saveEncounter() {
-    const notes = document.getElementById('clinician-notes').value;
-    await fetch(API + '/clinical/encounters', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ patient_id:'P-101', clinician_id:'doctor1', triage_risk:'HIGH', notes }) }).catch(()=>{});
-    alert('FHIR Encounter saved successfully.');
+    const notes = document.getElementById('clinician-notes').value.trim();
+    const actorId = (CURRENT_SESSION && CURRENT_SESSION.user) ? CURRENT_SESSION.user.username : 'doctor1';
+    
+    const res = await authFetch(API + '/clinical/encounters', {
+      method:'POST',
+      body: JSON.stringify({
+        patient_id: ACTIVE_PATIENT_ID,
+        clinician_id: actorId,
+        triage_risk: 'HIGH',
+        notes
+      })
+    });
+    if (res.ok) {
+      alert('FHIR Encounter saved successfully.');
+      document.getElementById('clinician-notes').value = '';
+    }
   }
 
-  // ===== ADMIN =====
+  // Admin & Governance Flow
   async function fetchAudit() {
     try {
-      const r = await fetch(API + '/audit/events'); const d = await r.json();
-      const feed = document.getElementById('audit-feed'); feed.innerHTML = '';
+      const r = await authFetch(API + '/audit/events');
+      if (!r.ok) return;
+      const d = await r.json();
+      const feed = document.getElementById('audit-feed');
+      feed.innerHTML = '';
       (d.events || []).forEach(e => {
-        const div = document.createElement('div'); div.className = 'audit-entry';
-        div.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:2px;"><strong style="color:var(--accent-blue);">' + e.action + '</strong><span style="color:var(--text-dim);">' + new Date(e.timestamp*1000).toLocaleTimeString() + '</span></div><div>Actor: <span style="color:var(--accent-amber);">' + e.actor_id + ' (' + e.actor_role + ')</span> &rarr; ' + e.target_resource_id + '</div><div class="hash-mono">SHA256: ' + e.record_hash.substring(0,40) + '...</div>';
+        const div = document.createElement('div');
+        div.className = 'audit-entry';
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+            <strong style="color:var(--accent-blue);">${e.action}</strong>
+            <span style="color:var(--text-dim);">${new Date(e.timestamp*1000).toLocaleTimeString()}</span>
+          </div>
+          <div>Actor: <span style="color:var(--accent-amber);">${e.actor_id} (${e.actor_role})</span> &rarr; ${e.target_resource_id}</div>
+          <div class="hash-mono">SHA256: ${e.record_hash.substring(0,40)}...</div>
+        `;
         feed.appendChild(div);
       });
       document.getElementById('m-audit-count').textContent = d.total || '--';
     } catch(e) {}
   }
+
   async function fetchFairness() {
     try {
-      const r = await fetch(API + '/ai/fairness-metrics'); const d = await r.json();
+      const r = await authFetch(API + '/ai/fairness-metrics');
+      if (!r.ok) return;
+      const d = await r.json();
       if (d.demographic_parity) {
         document.getElementById('m-dp-gender').textContent = d.demographic_parity.gender_parity_ratio || '0.950';
         document.getElementById('m-dp-region').textContent = d.demographic_parity.region_parity_ratio || '0.920';

@@ -19,6 +19,29 @@ SERVICE_MAP = {
     "/api/v1/audit": "http://localhost:8004/audit"
 }
 
+def verify_token_locally(token: str) -> dict:
+    import base64
+    import hashlib
+    import hmac
+    import time
+    SECRET_KEY = "ayushman-bharat-secure-production-secret-key"
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+        header_b64, payload_b64, sig_b64 = parts
+        expected_sig = hmac.new(SECRET_KEY.encode(), f"{header_b64}.{payload_b64}".encode(), hashlib.sha256).digest()
+        actual_sig = base64.urlsafe_b64decode(sig_b64 + "=="[:(4 - len(sig_b64) % 4) % 4])
+        if not hmac.compare_digest(expected_sig, actual_sig):
+            return None
+        payload_json = base64.urlsafe_b64decode(payload_b64 + "=="[:(4 - len(payload_b64) % 4) % 4]).decode()
+        payload = json.loads(payload_json)
+        if payload.get("exp", 0) < time.time():
+            return None
+        return payload
+    except Exception:
+        return None
+
 class GatewayHandler(BaseHTTPRequestHandler):
     def _send_cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -30,9 +53,44 @@ class GatewayHandler(BaseHTTPRequestHandler):
         self._send_cors_headers()
         self.end_headers()
 
+    def _check_route_authorization(self, path: str) -> tuple[bool, str, dict]:
+        # Public routes
+        if path.startswith("/api/v1/auth/login") or path.startswith("/api/v1/auth/register") or path in ["/health", "/api/v1/health"]:
+            return True, "", {}
+
+        # Extract token
+        auth_header = self.headers.get("Authorization", "")
+        token = auth_header.replace("Bearer ", "").strip() if "Bearer " in auth_header else ""
+        if not token:
+            # Allow basic anonymous triage evaluation from public patient portal with limited privileges
+            if path == "/api/v1/ai/triage" or path == "/api/v1/ai/fairness-metrics":
+                return True, "", {}
+            return False, "Missing Authorization Header (Bearer Token Required)", {}
+
+        claims = verify_token_locally(token)
+        if not claims:
+            return False, "Invalid or Expired JWT Token", {}
+
+        role = claims.get("role")
+        # Enforce RBAC at Gateway
+        if path.startswith("/api/v1/audit") and role not in ["ADMIN", "AUDITOR"]:
+            return False, f"Access Denied: Role '{role}' cannot access Governance/Audit routes", claims
+
+        return True, "", claims
+
     def _proxy_request(self, method: str):
         parsed = urlparse(self.path)
         path = parsed.path
+
+        # Enforce Gateway-level security check
+        authorized, error_msg, claims = self._check_route_authorization(path)
+        if not authorized:
+            self.send_response(401 if "Token" in error_msg or "Header" in error_msg else 403)
+            self.send_header("Content-Type", "application/json")
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": error_msg, "status": 401 if "Token" in error_msg or "Header" in error_msg else 403}).encode())
+            return
 
         target_base = None
         remaining_path = ""

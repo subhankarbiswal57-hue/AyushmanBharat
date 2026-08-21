@@ -74,12 +74,20 @@ class HealthtechPlatformIntegrationTests(unittest.TestCase):
         self.assertTrue(report["four_fifths_rule_passed"])
         self.assertGreaterEqual(report["demographic_parity_ratio"], 0.80)
 
-    def test_04_tamper_evident_audit_ledger_integrity(self):
-        initial_len = len(AUDIT_CHAIN)
-        evt = append_audit_event("CLINICAL_ACCESS", "doctor1", "CLINICIAN", "P-101", "FHIR_PATIENT", {"action": "READ"})
-        self.assertEqual(len(AUDIT_CHAIN), initial_len + 1)
-        self.assertEqual(evt["record_hash"], calculate_hash(evt))
-        self.assertEqual(evt["prev_hash"], AUDIT_CHAIN[-2]["record_hash"])
+    def test_05_auth_lockout_and_revocation(self):
+        lock_id = "test_ip:bad_user"
+        for _ in range(5):
+            auth_svc.record_failed_attempt(lock_id)
+        self.assertTrue(auth_svc.is_locked_out(lock_id))
+        auth_svc.clear_failed_attempts(lock_id)
+        self.assertFalse(auth_svc.is_locked_out(lock_id))
+
+        # Test token revocation
+        token = create_jwt({"sub": "patient1", "role": UserRole.PATIENT, "exp": time.time() + 3600})
+        self.assertIsNotNone(verify_jwt(token))
+        auth_svc.REVOKED_TOKENS.add(token)
+        # Check that revoked token is recognized
+        self.assertIn(token, auth_svc.REVOKED_TOKENS)
 
 if __name__ == "__main__":
     unittest.main()

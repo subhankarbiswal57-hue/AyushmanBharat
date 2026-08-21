@@ -75,6 +75,27 @@ def verify_jwt(token: str) -> dict:
     except Exception:
         return None
 
+# Rate limiting & lockout tracking: {ip_or_user: [timestamp, ...]}
+LOGIN_ATTEMPTS = {}
+LOCKOUT_THRESHOLD = 5
+LOCKOUT_DURATION = 60 # 60 seconds lockout after 5 failed attempts
+REVOKED_TOKENS = set()
+
+def is_locked_out(identifier: str) -> bool:
+    now = time.time()
+    attempts = [t for t in LOGIN_ATTEMPTS.get(identifier, []) if now - t < LOCKOUT_DURATION]
+    LOGIN_ATTEMPTS[identifier] = attempts
+    return len(attempts) >= LOCKOUT_THRESHOLD
+
+def record_failed_attempt(identifier: str):
+    now = time.time()
+    attempts = [t for t in LOGIN_ATTEMPTS.get(identifier, []) if now - t < LOCKOUT_DURATION]
+    attempts.append(now)
+    LOGIN_ATTEMPTS[identifier] = attempts
+
+def clear_failed_attempts(identifier: str):
+    LOGIN_ATTEMPTS.pop(identifier, None)
+
 class AuthHandler(BaseHTTPRequestHandler):
     def _send_json(self, status: int, data: dict):
         self.send_response(status)
@@ -94,12 +115,20 @@ class AuthHandler(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(content_length).decode() or "{}")
 
         if parsed.path == "/auth/login":
-            username = body.get("username")
-            password = body.get("password")
+            username = body.get("username", "")
+            password = body.get("password", "")
+            client_ip = self.client_address[0] if self.client_address else "unknown"
+            lock_id = f"{client_ip}:{username}"
+
+            if is_locked_out(lock_id):
+                return self._send_json(429, {"error": "Too many failed attempts. Account temporarily locked for 60 seconds."})
+
             user = USERS_DB.get(username)
             if not user or user["password_hash"] != hashlib.sha256(password.encode()).hexdigest():
+                record_failed_attempt(lock_id)
                 return self._send_json(401, {"error": "Invalid username or password"})
             
+            clear_failed_attempts(lock_id)
             token_payload = {
                 "sub": username,
                 "role": user["role"],
@@ -115,9 +144,28 @@ class AuthHandler(BaseHTTPRequestHandler):
                     "username": username,
                     "role": user["role"],
                     "full_name": user["full_name"],
-                    "abha_id": user.get("abha_id")
+                    "abha_id": user.get("abha_id"),
+                    "preferred_language": user.get("language", "en")
                 }
             })
+
+        elif parsed.path == "/auth/logout":
+            token = body.get("token") or self.headers.get("Authorization", "").replace("Bearer ", "")
+            if token:
+                REVOKED_TOKENS.add(token)
+            return self._send_json(200, {"message": "Logged out successfully"})
+
+        elif parsed.path == "/auth/refresh":
+            token = body.get("token") or self.headers.get("Authorization", "").replace("Bearer ", "")
+            if token in REVOKED_TOKENS:
+                return self._send_json(401, {"error": "Token has been revoked"})
+            payload = verify_jwt(token)
+            if not payload:
+                return self._send_json(401, {"error": "Invalid or expired token"})
+            
+            payload["exp"] = time.time() + 86400
+            new_token = create_jwt(payload)
+            return self._send_json(200, {"access_token": new_token, "token_type": "Bearer"})
 
         elif parsed.path == "/auth/register":
             username = body.get("username")
@@ -137,6 +185,8 @@ class AuthHandler(BaseHTTPRequestHandler):
 
         elif parsed.path == "/auth/verify":
             token = body.get("token") or self.headers.get("Authorization", "").replace("Bearer ", "")
+            if token in REVOKED_TOKENS:
+                return self._send_json(401, {"valid": False, "error": "Token has been revoked"})
             payload = verify_jwt(token)
             if not payload:
                 return self._send_json(401, {"valid": False, "error": "Invalid or expired token"})
