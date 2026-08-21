@@ -62,22 +62,12 @@ def start_all_services():
 
     start_thread(
         run_static_server, 
-        (os.path.join(BASE_DIR, "apps", "patient-frontend"), 3000, "Patient Frontend")
-    )
-    start_thread(
-        run_static_server, 
-        (os.path.join(BASE_DIR, "apps", "clinician-frontend"), 3001, "Clinician Frontend")
-    )
-    start_thread(
-        run_static_server, 
-        (os.path.join(BASE_DIR, "apps", "admin-dashboard"), 3002, "Admin Governance Console")
+        (os.path.join(BASE_DIR, "apps", "unified-portal"), 3000, "Unified Portal")
     )
 
     print("\n[OK] All Platform Services Online:")
-    print("  * API Gateway:                http://localhost:8000")
-    print("  * Patient App (Multilingual): http://localhost:3000")
-    print("  * Clinician Triage Portal:    http://localhost:3001")
-    print("  * Governance & AI Console:    http://localhost:3002")
+    print("  * API Gateway:         http://localhost:8000")
+    print("  * Unified Portal:      http://localhost:3000")
     print("=" * 75)
 
 if __name__ == "__main__":
