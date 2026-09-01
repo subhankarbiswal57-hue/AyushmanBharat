@@ -1,29 +1,27 @@
 """
 Master Orchestrator for Ayushman Bharat Healthtech Platform
-Runs all microservices (Ports 8000-8004) and Web App Static File Servers (Ports 3000-3002)
+Runs all FastAPI microservices (Ports 8000-8004) and Web App Static File Server (Port 3000)
 """
 import sys
 import os
 import threading
 import time
-import importlib.util
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+import uvicorn
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, BASE_DIR)
 
-def load_module_from_path(module_name: str, file_path: str):
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module
+from shared.config import (
+    GATEWAY_PORT, AUTH_PORT, CORE_PORT, AIML_PORT, AUDIT_PORT, PORTAL_PORT
+)
+from shared.db import init_database
 
-auth_svc = load_module_from_path("auth_svc", os.path.join(BASE_DIR, "services", "auth-service", "main.py"))
-core_svc = load_module_from_path("core_svc", os.path.join(BASE_DIR, "services", "core-backend", "main.py"))
-audit_svc = load_module_from_path("audit_svc", os.path.join(BASE_DIR, "services", "audit-logging", "main.py"))
-gateway_svc = load_module_from_path("gateway_svc", os.path.join(BASE_DIR, "services", "api-gateway", "main.py"))
-aiml_svc = load_module_from_path("aiml_svc", os.path.join(BASE_DIR, "ai-ml", "monitoring", "app.py"))
+init_database()
+
+def run_uvicorn_service(app_path: str, port: int, name: str):
+    print(f"[{name}] Starting FastAPI on http://localhost:{port}")
+    uvicorn.run(app_path, host="0.0.0.0", port=port, log_level="warning")
 
 def make_static_handler(root_dir: str):
     class StaticHandler(SimpleHTTPRequestHandler):
@@ -48,27 +46,31 @@ def start_thread(target, args=()):
     return t
 
 def start_all_services():
-    print("=" * 75)
-    print("[INIT] Starting Ayushman Bharat Healthtech Platform Services & Apps...")
-    print("=" * 75)
+    print("=" * 80)
+    print("[INIT] Starting Ayushman Bharat Modernized Healthtech Microservices...")
+    print("=" * 80)
 
-    start_thread(auth_svc.run_server, (8001,))
-    start_thread(core_svc.run_server, (8002,))
-    start_thread(aiml_svc.run_server, (8003,))
-    start_thread(audit_svc.run_server, (8004,))
-    time.sleep(0.3)
+    start_thread(run_uvicorn_service, ("services.auth_service.main:app", AUTH_PORT, "Auth Service"))
+    start_thread(run_uvicorn_service, ("services.core_backend.main:app", CORE_PORT, "Core Clinical Backend"))
+    start_thread(run_uvicorn_service, ("ai_ml.monitoring.app:app", AIML_PORT, "AI/ML Fairness Service"))
+    start_thread(run_uvicorn_service, ("services.audit_logging.main:app", AUDIT_PORT, "Audit Logging Service"))
+    time.sleep(0.5)
 
-    start_thread(gateway_svc.run_server, (8000,))
+    start_thread(run_uvicorn_service, ("services.api_gateway.main:app", GATEWAY_PORT, "API Gateway"))
 
     start_thread(
-        run_static_server, 
-        (os.path.join(BASE_DIR, "apps", "unified-portal"), 3000, "Unified Portal")
+        run_static_server,
+        (os.path.join(BASE_DIR, "apps", "unified-portal"), PORTAL_PORT, "Unified Portal")
     )
 
-    print("\n[OK] All Platform Services Online:")
-    print("  * API Gateway:         http://localhost:8000")
-    print("  * Unified Portal:      http://localhost:3000")
-    print("=" * 75)
+    print("\n[OK] All Platform Services Online & Modernized:")
+    print(f"  * Central API Gateway: http://localhost:{GATEWAY_PORT} (Docs: /docs)")
+    print(f"  * Auth Service:        http://localhost:{AUTH_PORT} (Docs: /docs)")
+    print(f"  * Core Clinical Backend: http://localhost:{CORE_PORT} (Docs: /docs)")
+    print(f"  * AI/ML Fairness Layer: http://localhost:{AIML_PORT} (Docs: /docs)")
+    print(f"  * Tamper-Evident Audit: http://localhost:{AUDIT_PORT} (Docs: /docs)")
+    print(f"  * Unified Portal:      http://localhost:{PORTAL_PORT}")
+    print("=" * 80)
 
 if __name__ == "__main__":
     start_all_services()

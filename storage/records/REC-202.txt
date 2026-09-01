@@ -1,0 +1,9 @@
+Record Type: Prescription
+Title: Hypertension Medication
+Patient: P-101
+
+Summary:
+Amlodipine 5mg once daily
+
+Details:
+Oral administration

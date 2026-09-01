@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Phase 0 Production Storage)
+  postgres:
+    image: postgres:15-alpine
+    container_name: ayushman_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+      POSTGRES_DB: ${POSTGRES_DB:-ayushman_healthtech}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Session Store
+  redis:
+    image: redis:7-alpine
+    container_name: ayushman_redis
+    ports:
+      - "6379:6379"
+
+  # 1. API Gateway & Reverse Proxy
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api_gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - GATEWAY_PORT=8000
+      - AUTH_SERVICE_PORT=8001
+      - CORE_SERVICE_PORT=8002
+      - AIML_SERVICE_PORT=8003
+      - AUDIT_SERVICE_PORT=8004
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-ayushman-bharat-secure-production-secret-key-32chars}
+    depends_on:
+      - auth-service
+      - core-backend
+      - aiml-service
+      - audit-logging
+
+  # 2. Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth_service/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - AUTH_SERVICE_PORT=8001
+      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/ayushman_healthtech
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-ayushman-bharat-secure-production-secret-key-32chars}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 3. Core Clinical Backend
+  core-backend:
+    build:
+      context: .
+      dockerfile: services/core_backend/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - CORE_SERVICE_PORT=8002
+      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/ayushman_healthtech
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 4. AI/ML Fairness & Triage Service
+  aiml-service:
+    build:
+      context: .
+      dockerfile: ai_ml/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - AIML_SERVICE_PORT=8003
+
+  # 5. Tamper-Evident Audit Logging Service
+  audit-logging:
+    build:
+      context: .
+      dockerfile: services/audit_logging/Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      - AUDIT_SERVICE_PORT=8004
+      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/ayushman_healthtech
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 6. Unified Frontend Portal
+  unified-portal:
+    image: nginx:alpine
+    volumes:
+      - ./apps/unified-portal:/usr/share/nginx/html:ro
+    ports:
+      - "3000:80"
+
+volumes:
+  pgdata:
