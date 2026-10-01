@@ -6,3 +6,4 @@
 - Update step 6 : routine notes
 - Update step 7 : routine notes
 - Update step 8 : routine notes
+- Update step 9 : routine notes
