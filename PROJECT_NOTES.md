@@ -1,1 +1,2 @@
 - Update step 1 : routine notes
+- Update step 2 : routine notes
