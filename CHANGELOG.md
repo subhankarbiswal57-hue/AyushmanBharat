@@ -16,3 +16,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Docker Compose and Kubernetes deployment blueprint with DR plan (`docs/DEPLOYMENT.md`).
 - Contributing guidelines with branching strategy and commit conventions (`CONTRIBUTING.md`).
 - This changelog (`CHANGELOG.md`).
+
+## [1.1.0] - 2026-10-03
+- Added multi-language support for Hindi and Bengali
+- Improved patient onboarding flow
