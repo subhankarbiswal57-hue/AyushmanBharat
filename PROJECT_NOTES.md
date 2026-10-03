@@ -8,3 +8,7 @@
 - Update step 8 : routine notes
 - Update step 9 : routine notes
 - Update step 10 : routine notes
+
+## Sprint 3 Notes
+- API rate limiting added to /enroll endpoint
+- DB indexing optimized for beneficiary lookup
