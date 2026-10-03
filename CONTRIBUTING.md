@@ -24,3 +24,7 @@ docs(scope): short description
 
 ## Code of Conduct
 All contributors must adhere to respectful, inclusive communication. Healthcare data is sensitive — treat every contribution with the gravity it deserves.
+
+## Code Review Checklist
+- Ensure all API responses include error codes
+- Run pytest tests/ before submitting PR
