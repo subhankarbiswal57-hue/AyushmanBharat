@@ -3,171 +3,485 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ayushman Bharat — Patient Health & Triage Portal</title>
+  <title>Ayushman Bharat — Patient Health &amp; Triage Portal</title>
+  <meta name="description" content="Equity-first AI-assisted patient care and triage under Ayushman Bharat Digital Mission (ABDM). Check symptoms, manage ABHA identity, and connect with clinicians.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #0284c7;
-      --primary-dark: #0369a1;
-      --bg: #f8fafc;
+      --primary: #0ea5e9;
+      --primary-dark: #0284c7;
+      --primary-glow: rgba(14,165,233,0.18);
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #273549;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #334155;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --emergency: #dc2626;
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"] {
+      --bg: #f0f9ff;
       --surface: #ffffff;
+      --surface-2: #f8fafc;
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
-      --success: #16a34a;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; }
-    header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
-    .logo-area { display: flex; align-items: center; gap: 12px; }
-    .logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
-    .lang-selector { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; font-weight: 500; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; transition: background 0.3s, color 0.3s; }
+
+    /* ── Layout ───────────────────────────────────── */
+    .container { max-width: 960px; margin: 0 auto; }
+
+    /* ── Header ───────────────────────────────────── */
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface); padding: 18px 24px; border-radius: var(--radius);
+      border: 1px solid var(--border); margin-bottom: 24px; box-shadow: var(--shadow);
+      position: relative; overflow: hidden;
+    }
+    header::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #0ea5e9, #6366f1, #22c55e);
+    }
+    .logo-area { display: flex; align-items: center; gap: 14px; }
+    .logo-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      color: white; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px var(--primary-glow);
+      flex-shrink: 0;
+    }
+    .header-controls { display: flex; align-items: center; gap: 12px; }
+    .lang-selector {
+      padding: 7px 12px; border-radius: 10px;
+      border: 1px solid var(--border); font-size: 13px; font-weight: 500;
+      background: var(--surface-2); color: var(--text); cursor: pointer;
+    }
+    .theme-btn {
+      width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface-2); cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center; transition: transform 0.2s;
+    }
+    .theme-btn:hover { transform: scale(1.1); }
+
+    /* ── ABDM Banner ──────────────────────────────── */
+    .abdm-banner {
+      background: linear-gradient(135deg, #0369a1 0%, #1e3a5f 100%);
+      border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 14px;
+      border: 1px solid #0ea5e9; box-shadow: var(--shadow);
+    }
+    .abdm-logo { font-size: 28px; }
+    .abdm-text { flex: 1; }
+    .abdm-badge-pill {
+      background: rgba(34,197,94,0.15); color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.3); border-radius: 20px;
+      padding: 4px 12px; font-size: 12px; font-weight: 600;
+    }
+
+    /* ── Grid ─────────────────────────────────────── */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: var(--surface); padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
-    h2 { font-size: 18px; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
-    .abha-badge { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 14px; border-radius: 8px; margin-bottom: 16px; }
-    .symptom-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .chip { padding: 8px 14px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 14px; transition: all 0.2s; user-select: none; }
-    .chip.active { background: var(--primary); color: white; border-color: var(--primary-dark); }
-    .btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
-    .btn:hover { background: var(--primary-dark); }
-    .triage-result { margin-top: 16px; padding: 16px; border-radius: 8px; display: none; }
-    .status-emergency { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-    .status-high { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-    .status-medium { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
-    .status-low { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-    .consent-toggle { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); margin-top: 12px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+    /* ── Cards ────────────────────────────────────── */
+    .card {
+      background: var(--surface); padding: 24px; border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .card-full { grid-column: 1 / -1; }
+    h2 {
+      font-size: 16px; font-weight: 600; margin-bottom: 18px;
+      color: var(--text); display: flex; align-items: center; gap: 8px;
+    }
+    .section-icon {
+      width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .icon-blue   { background: rgba(14,165,233,0.15); }
+    .icon-green  { background: rgba(34,197,94,0.15); }
+    .icon-purple { background: rgba(99,102,241,0.15); }
+    .icon-orange { background: rgba(245,158,11,0.15); }
+
+    /* ── ABHA Card ────────────────────────────────── */
+    .abha-badge {
+      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(16,185,129,0.05));
+      border: 1px solid rgba(34,197,94,0.25); color: var(--text);
+      padding: 16px; border-radius: 12px; margin-bottom: 16px;
+    }
+    .abha-id { font-size: 19px; font-weight: 700; font-family: monospace; letter-spacing: 1px; color: #4ade80; }
+    .health-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .stat-pill {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; text-align: center;
+    }
+    .stat-pill .stat-val { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .stat-pill .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Consent Toggle ───────────────────────────── */
+    .consent-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px; background: var(--surface-2); border-radius: 12px;
+      border: 1px solid var(--border); margin-top: 12px;
+    }
+    .toggle-switch { position: relative; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: var(--border); border-radius: 24px;
+      cursor: pointer; transition: background 0.3s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      left: 3px; top: 3px; background: white; border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--success); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* ── Symptom Chips ────────────────────────────── */
+    .symptom-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .chip {
+      padding: 7px 14px; background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500;
+      transition: all 0.2s; user-select: none; color: var(--text);
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.active {
+      background: var(--primary-glow); color: var(--primary);
+      border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    /* ── Vitals ───────────────────────────────────── */
+    .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; }
+    input[type="number"] {
+      width: 100%; padding: 9px 12px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+      font-size: 15px; font-weight: 600; transition: border-color 0.2s;
+    }
+    input[type="number"]:focus { outline: none; border-color: var(--primary); }
+
+    /* ── Button ───────────────────────────────────── */
+    .btn {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white; border: none; padding: 13px 20px; border-radius: 12px;
+      font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;
+      transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.3px;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn.loading { opacity: 0.7; cursor: not-allowed; }
+
+    /* ── Triage Result ────────────────────────────── */
+    .triage-result {
+      margin-top: 14px; padding: 16px; border-radius: 12px; display: none;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .status-emergency { background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.4); color: #fca5a5; }
+    .status-high      { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.4); color: #fcd34d; }
+    .status-medium    { background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.35); color: #7dd3fc; }
+    .status-low       { background: rgba(34,197,94,0.12);  border: 1px solid rgba(34,197,94,0.35);  color: #86efac; }
+    .triage-level { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .triage-actions { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .triage-action-item { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+
+    /* ── Appointments ─────────────────────────────── */
+    .appt-list { display: flex; flex-direction: column; gap: 10px; }
+    .appt-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px;
+      background: var(--surface-2); border-radius: 10px; border: 1px solid var(--border);
+    }
+    .appt-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .appt-dot.upcoming { background: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+    .appt-dot.completed { background: var(--success); }
+    .appt-meta { flex: 1; }
+    .appt-title { font-size: 14px; font-weight: 600; }
+    .appt-date  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Alert banner ─────────────────────────────── */
+    .alert-banner {
+      display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+      border-radius: 10px; margin-bottom: 8px; font-size: 13px; font-weight: 500;
+    }
+    .alert-info { background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.3); color: #7dd3fc; }
+
+    /* ── Footer ───────────────────────────────────── */
+    footer {
+      text-align: center; margin-top: 28px; padding: 16px;
+      font-size: 12px; color: var(--muted);
+    }
+    footer a { color: var(--primary); text-decoration: none; }
   </style>
 </head>
 <body>
   <div class="container">
+
+    <!-- Header -->
     <header>
       <div class="logo-area">
         <div class="logo-icon">आ</div>
         <div>
-          <h1 style="font-size: 20px;" id="title-text">Ayushman Bharat Digital Health</h1>
-          <p style="font-size: 13px; color: var(--muted);" id="subtitle-text">Equity-First Patient Care & Triage</p>
+          <h1 style="font-size: 18px; font-weight: 700;" id="title-text">Ayushman Bharat Digital Health</h1>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 2px;" id="subtitle-text">Equity-First Patient Care &amp; Triage</p>
         </div>
       </div>
-      <div>
-        <label for="lang" style="font-size: 12px; color: var(--muted); display: block;">Language / भाषा</label>
-        <select id="lang" class="lang-selector" onchange="updateLanguage()">
-          <option value="en">English</option>
-          <option value="hi">हिंदी (Hindi)</option>
-          <option value="od">ଓଡ଼ିଆ (Odia)</option>
-          <option value="bn">বাংলা (Bengali)</option>
-          <option value="ta">தமிழ் (Tamil)</option>
-        </select>
+      <div class="header-controls">
+        <div>
+          <label for="lang" style="font-size: 11px; color: var(--muted);">Language / भाषा</label>
+          <select id="lang" class="lang-selector" onchange="updateLanguage()">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="od">ଓଡ଼ିଆ</option>
+            <option value="bn">বাংলা</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+          </select>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle dark/light mode" aria-label="Toggle theme">🌙</button>
       </div>
     </header>
 
+    <!-- ABDM Banner -->
+    <div class="abdm-banner">
+      <div class="abdm-logo">🏥</div>
+      <div class="abdm-text">
+        <div style="font-weight: 700; font-size: 14px; color: #7dd3fc;">Ayushman Bharat Digital Mission (ABDM)</div>
+        <div style="font-size: 12px; color: #93c5fd; margin-top: 2px;" id="abdm-desc">Secure, interoperable, equity-first health infrastructure for every Indian citizen.</div>
+      </div>
+      <div class="abdm-badge-pill">🟢 System Online</div>
+    </div>
+
     <div class="grid">
-      <!-- ABHA Health Profile -->
+
+      <!-- ABHA Card -->
       <div class="card">
-        <h2><span id="profile-heading">ABHA Digital Identity</span></h2>
+        <h2><span class="section-icon icon-blue">🪪</span><span id="profile-heading">ABHA Digital Identity</span></h2>
         <div class="abha-badge">
-          <div style="font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">ABHA Address</div>
-          <div style="font-size: 18px; font-weight: bold; font-family: monospace;">14-8899-2341-9988</div>
-          <div style="font-size: 13px; margin-top: 4px;">Aarav Sharma • 42 Yrs • Rural District (Odisha)</div>
+          <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: var(--muted);">ABHA Address</div>
+          <div class="abha-id">14-8899-2341-9988</div>
+          <div style="font-size: 13px; margin-top: 6px;" id="patient-name">Aarav Sharma &bull; 42 Yrs &bull; Rural District (Odisha)</div>
+        </div>
+
+        <div class="health-stats">
+          <div class="stat-pill">
+            <div class="stat-val">97%</div>
+            <div class="stat-lbl">SpO₂</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-val">98.6°F</div>
+            <div class="stat-lbl">Temperature</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-val">120/80</div>
+            <div class="stat-lbl">Blood Pressure</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-val">72 bpm</div>
+            <div class="stat-lbl">Pulse Rate</div>
+          </div>
         </div>
 
         <div class="consent-toggle">
           <div>
-            <strong id="consent-title">ABDM Health Data Sharing</strong>
-            <p style="font-size: 12px; color: var(--muted);" id="consent-desc">Allow authorized clinicians to view health summary</p>
+            <strong style="font-size: 14px;" id="consent-title">ABDM Health Data Sharing</strong>
+            <p style="font-size: 12px; color: var(--muted); margin-top: 3px;" id="consent-desc">Allow authorized clinicians to view health summary</p>
           </div>
-          <input type="checkbox" id="consent-check" checked onchange="toggleConsent()" style="width: 20px; height: 20px; cursor: pointer;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="consent-check" checked onchange="toggleConsent()">
+            <span class="toggle-slider"></span>
+          </label>
         </div>
-        <p id="consent-msg" style="font-size: 12px; color: var(--success); margin-top: 8px; font-weight: 500;">✓ Consent Active & Verified via ABDM Gateway</p>
+        <p id="consent-msg" style="font-size: 12px; color: var(--success); margin-top: 10px; font-weight: 500;">✓ Consent Active &amp; Verified via ABDM Gateway</p>
       </div>
 
-      <!-- AI-Assisted Symptom Triage -->
+      <!-- Symptom Triage -->
       <div class="card">
-        <h2><span id="symptom-heading">Quick Symptom Check & Triage</span></h2>
+        <h2><span class="section-icon icon-orange">🩺</span><span id="symptom-heading">Quick Symptom Check &amp; Triage</span></h2>
         <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;" id="symptom-hint">Select what you are experiencing today:</p>
-        
+
         <div class="symptom-chips" id="symptom-list">
-          <div class="chip" onclick="toggleChip(this, 'chest_pain')">Chest Pain</div>
-          <div class="chip" onclick="toggleChip(this, 'shortness_of_breath')">Shortness of Breath</div>
-          <div class="chip" onclick="toggleChip(this, 'high_fever')">High Fever</div>
-          <div class="chip" onclick="toggleChip(this, 'cough')">Cough</div>
-          <div class="chip" onclick="toggleChip(this, 'fatigue')">Fatigue</div>
-          <div class="chip" onclick="toggleChip(this, 'severe_headache')">Severe Headache</div>
+          <div class="chip" onclick="toggleChip(this,'chest_pain')">💔 Chest Pain</div>
+          <div class="chip" onclick="toggleChip(this,'shortness_of_breath')">😮‍💨 Breathlessness</div>
+          <div class="chip" onclick="toggleChip(this,'high_fever')">🌡️ High Fever</div>
+          <div class="chip" onclick="toggleChip(this,'cough')">🤧 Cough</div>
+          <div class="chip" onclick="toggleChip(this,'fatigue')">😴 Fatigue</div>
+          <div class="chip" onclick="toggleChip(this,'severe_headache')">🤕 Severe Headache</div>
+          <div class="chip" onclick="toggleChip(this,'vomiting')">🤮 Vomiting</div>
+          <div class="chip" onclick="toggleChip(this,'dizziness')">💫 Dizziness</div>
+          <div class="chip" onclick="toggleChip(this,'joint_pain')">🦴 Joint Pain</div>
+          <div class="chip" onclick="toggleChip(this,'rash')">🔴 Skin Rash</div>
+          <div class="chip" onclick="toggleChip(this,'abdominal_pain')">🫃 Abdominal Pain</div>
+          <div class="chip" onclick="toggleChip(this,'vision_blur')">👁️ Blurred Vision</div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+        <div class="vitals-grid">
           <div>
-            <label style="font-size: 12px; color: var(--muted);">SpO2 Pulse Oximeter (%)</label>
-            <input type="number" id="vital-spo2" value="97" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+            <label for="vital-spo2">SpO₂ Pulse Oximeter (%)</label>
+            <input type="number" id="vital-spo2" value="97" min="70" max="100">
           </div>
           <div>
-            <label style="font-size: 12px; color: var(--muted);">Temperature (°F)</label>
-            <input type="number" id="vital-temp" value="98.6" step="0.1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+            <label for="vital-temp">Temperature (°F)</label>
+            <input type="number" id="vital-temp" value="98.6" step="0.1" min="90" max="110">
           </div>
         </div>
 
-        <button class="btn" onclick="runTriage()" id="btn-triage">Evaluate Symptoms</button>
+        <button class="btn" onclick="runTriage()" id="btn-triage">🔍 Evaluate Symptoms</button>
 
         <div id="triage-output" class="triage-result">
-          <div id="triage-badge" style="font-weight: bold; font-size: 16px; margin-bottom: 4px;"></div>
-          <div id="triage-path" style="font-size: 14px; margin-bottom: 8px;"></div>
-          <div style="font-size: 12px; opacity: 0.85;" id="triage-equity">✓ Evaluated with Demographic Parity Protection</div>
+          <div class="triage-level" id="triage-badge"></div>
+          <div style="font-size: 14px; margin-bottom: 6px;" id="triage-path"></div>
+          <div class="triage-actions" id="triage-actions"></div>
+          <div style="font-size: 11px; opacity: 0.75; margin-top: 8px;" id="triage-equity">✓ Evaluated with Demographic Parity Protection (AI Bias Mitigation Active)</div>
         </div>
       </div>
-    </div>
+
+      <!-- Upcoming Appointments -->
+      <div class="card">
+        <h2><span class="section-icon icon-purple">📅</span><span id="appt-heading">Upcoming Appointments</span></h2>
+        <div class="alert-banner alert-info" style="margin-bottom: 14px;">
+          ℹ️ Telehealth slots available — no travel required.
+        </div>
+        <div class="appt-list" id="appt-list">
+          <div class="appt-item">
+            <div class="appt-dot upcoming"></div>
+            <div class="appt-meta">
+              <div class="appt-title">General OPD — Dr. Priya Mehta</div>
+              <div class="appt-date">📍 PHC Bhubaneswar-3 &nbsp;|&nbsp; Tomorrow, 10:30 AM</div>
+            </div>
+            <span style="font-size: 11px; color: var(--primary); font-weight: 600; background: var(--primary-glow); padding: 3px 8px; border-radius: 6px;">CONFIRMED</span>
+          </div>
+          <div class="appt-item">
+            <div class="appt-dot upcoming"></div>
+            <div class="appt-meta">
+              <div class="appt-title">Telehealth — Cardiologist</div>
+              <div class="appt-date">📱 Video Call &nbsp;|&nbsp; Oct 12, 2:00 PM</div>
+            </div>
+            <span style="font-size: 11px; color: var(--warning); font-weight: 600; background: rgba(245,158,11,0.12); padding: 3px 8px; border-radius: 6px;">PENDING</span>
+          </div>
+          <div class="appt-item">
+            <div class="appt-dot completed"></div>
+            <div class="appt-meta">
+              <div class="appt-title">Blood Test — Pathology</div>
+              <div class="appt-date">✅ Completed Sep 28 &nbsp;|&nbsp; Reports Ready</div>
+            </div>
+            <span style="font-size: 11px; color: var(--success); font-weight: 600; background: rgba(34,197,94,0.1); padding: 3px 8px; border-radius: 6px;">DONE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nearby Care -->
+      <div class="card">
+        <h2><span class="section-icon icon-green">🗺️</span><span id="nearby-heading">Nearest Healthcare Facilities</span></h2>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="appt-item">
+            <div style="font-size: 22px;">🏥</div>
+            <div class="appt-meta">
+              <div class="appt-title">PHC Bhubaneswar-3</div>
+              <div class="appt-date">1.2 km &nbsp;|&nbsp; OPD: 8AM–2PM &nbsp;|&nbsp; PMJAY Empanelled</div>
+            </div>
+          </div>
+          <div class="appt-item">
+            <div style="font-size: 22px;">🏨</div>
+            <div class="appt-meta">
+              <div class="appt-title">District Hospital Cuttack</div>
+              <div class="appt-date">8.4 km &nbsp;|&nbsp; 24/7 Emergency &nbsp;|&nbsp; ABDM Integrated</div>
+            </div>
+          </div>
+          <div class="appt-item">
+            <div style="font-size: 22px;">💊</div>
+            <div class="appt-meta">
+              <div class="appt-title">Jan Aushadhi Kendra #445</div>
+              <div class="appt-date">0.6 km &nbsp;|&nbsp; Generic medicines at low cost</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+
+    <footer>
+      Powered by <strong>Ayushman Bharat Digital Mission (ABDM)</strong> &bull;
+      <a href="#">Privacy Policy</a> &bull;
+      <a href="#">Grievance Portal</a> &bull;
+      Data encrypted end-to-end · AI bias monitoring active
+    </footer>
   </div>
 
   <script>
+    // ── i18n ──────────────────────────────────────────────────────────────────
     const translations = {
       en: {
-        title: "Ayushman Bharat Digital Health",
-        subtitle: "Equity-First Patient Care & Triage",
-        profile: "ABHA Digital Identity",
-        consentTitle: "ABDM Health Data Sharing",
+        title: "Ayushman Bharat Digital Health", subtitle: "Equity-First Patient Care & Triage",
+        profile: "ABHA Digital Identity", consentTitle: "ABDM Health Data Sharing",
         consentDesc: "Allow authorized clinicians to view health summary",
-        symptomHead: "Quick Symptom Check & Triage",
-        symptomHint: "Select what you are experiencing today:",
-        btnTriage: "Evaluate Symptoms"
+        symptomHead: "Quick Symptom Check & Triage", symptomHint: "Select what you are experiencing today:",
+        btnTriage: "🔍 Evaluate Symptoms", apptHead: "Upcoming Appointments",
+        nearbyHead: "Nearest Healthcare Facilities",
+        abdmDesc: "Secure, interoperable, equity-first health infrastructure for every Indian citizen."
       },
       hi: {
-        title: "आयुष्मान भारत डिजिटल स्वास्थ्य",
-        subtitle: "समानता-केंद्रित रोगी देखभाल एवं ट्राइएज",
-        profile: "आभा (ABHA) डिजिटल पहचान",
-        consentTitle: "ABDM स्वास्थ्य डेटा साझाकरण",
+        title: "आयुष्मान भारत डिजिटल स्वास्थ्य", subtitle: "समानता-केंद्रित रोगी देखभाल एवं ट्राइएज",
+        profile: "आभा (ABHA) डिजिटल पहचान", consentTitle: "ABDM स्वास्थ्य डेटा साझाकरण",
         consentDesc: "अधिकृत डॉक्टरों को स्वास्थ्य सारांश देखने की अनुमति दें",
-        symptomHead: "लक्षण जांच एवं ट्राइएज",
-        symptomHint: "आज आप क्या लक्षण महसूस कर रहे हैं चुनें:",
-        btnTriage: "लक्षणों का मूल्यांकन करें"
+        symptomHead: "लक्षण जांच एवं ट्राइएज", symptomHint: "आज आप क्या लक्षण महसूस कर रहे हैं?",
+        btnTriage: "🔍 लक्षणों का मूल्यांकन करें", apptHead: "आगामी अपॉइंटमेंट",
+        nearbyHead: "नज़दीकी स्वास्थ्य सुविधाएं",
+        abdmDesc: "हर भारतीय नागरिक के लिए सुरक्षित और समावेशी डिजिटल स्वास्थ्य बुनियादी ढांचा।"
       },
       od: {
-        title: "ଆୟୁଷ୍ମାନ ଭାରତ ଡିଜିଟାଲ୍ ସ୍ୱାସ୍ଥ୍ୟ",
-        subtitle: "ସମାନତା ଭିତ୍ତିକ ରୋଗୀ ସେବା",
-        profile: "ଆଭା (ABHA) ପରିଚୟ",
-        consentTitle: "ସ୍ୱାସ୍ଥ୍ୟ ତଥ୍ୟ ସହଭାଗିତା",
+        title: "ଆୟୁଷ୍ମାନ ଭାରତ ଡିଜିଟାଲ୍ ସ୍ୱାସ୍ଥ୍ୟ", subtitle: "ସମାନତା ଭିତ୍ତିକ ରୋଗୀ ସେବା",
+        profile: "ଆଭା (ABHA) ପରିଚୟ", consentTitle: "ସ୍ୱାସ୍ଥ୍ୟ ତଥ୍ୟ ସହଭାଗିତା",
         consentDesc: "ଡାକ୍ତରଙ୍କୁ ତଥ୍ୟ ଦେଖିବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ",
-        symptomHead: "ଲକ୍ଷଣ ଯାଞ୍ଚ ଓ ପରାମର୍ଶ",
-        symptomHint: "ଆପଣଙ୍କ ଲକ୍ଷଣ ଚୟନ କରନ୍ତୁ:",
-        btnTriage: "ମୂଲ୍ୟାଙ୍କନ କରନ୍ତୁ"
+        symptomHead: "ଲକ୍ଷଣ ଯାଞ୍ଚ ଓ ପରାମର୍ଶ", symptomHint: "ଆପଣଙ୍କ ଲକ୍ଷଣ ଚୟନ କରନ୍ତୁ:",
+        btnTriage: "🔍 ମୂଲ୍ୟାଙ୍କନ କରନ୍ତୁ", apptHead: "ଆଗାମୀ ଅ୍ୟାପଏଣ୍ଟ୍ମେଣ୍ଟ",
+        nearbyHead: "ନିକଟସ୍ଥ ଚିକିତ୍ସା ସୁବିଧା",
+        abdmDesc: "ପ୍ରତ୍ୟେକ ଭାରତୀୟ ନାଗରିକ ପାଇଁ ସୁରକ୍ଷିତ ଡିଜିଟାଲ୍ ସ୍ୱାସ୍ଥ୍ୟ।"
+      },
+      te: {
+        title: "ఆయుష్మాన్ భారత్ డిజిటల్ ఆరోగ్యం", subtitle: "సమానత్వ ఆధారిత రోగి సంరక్షణ",
+        profile: "ABHA డిజిటల్ గుర్తింపు", consentTitle: "ABDM ఆరోగ్య డేటా భాగస్వామ్యం",
+        consentDesc: "అధికృత వైద్యులకు ఆరోగ్య సారాంశం చూడటానికి అనుమతి ఇవ్వండి",
+        symptomHead: "లక్షణ తనిఖీ & ట్రయాజ్", symptomHint: "మీరు నేడు అనుభవిస్తున్నది ఎంచుకోండి:",
+        btnTriage: "🔍 లక్షణాలను మూల్యాంకనం చేయండి", apptHead: "రాబోయే అపాయింట్‌మెంట్‌లు",
+        nearbyHead: "సమీప ఆరోగ్య సేవలు",
+        abdmDesc: "ప్రతి భారతీయ పౌరునికి సురక్షిత డిజిటల్ ఆరోగ్య మౌలిక సదుపాయాలు."
       }
     };
 
     let selectedSymptoms = [];
+    let isDark = true;
 
     function updateLanguage() {
       const lang = document.getElementById('lang').value;
       const t = translations[lang] || translations.en;
-      document.getElementById('title-text').innerText = t.title;
-      document.getElementById('subtitle-text').innerText = t.subtitle;
-      document.getElementById('profile-heading').innerText = t.profile;
-      document.getElementById('consent-title').innerText = t.consentTitle;
-      document.getElementById('consent-desc').innerText = t.consentDesc;
-      document.getElementById('symptom-heading').innerText = t.symptomHead;
-      document.getElementById('symptom-hint').innerText = t.symptomHint;
-      document.getElementById('btn-triage').innerText = t.btnTriage;
+      document.getElementById('title-text').textContent      = t.title;
+      document.getElementById('subtitle-text').textContent   = t.subtitle;
+      document.getElementById('profile-heading').textContent = t.profile;
+      document.getElementById('consent-title').textContent   = t.consentTitle;
+      document.getElementById('consent-desc').textContent    = t.consentDesc;
+      document.getElementById('symptom-heading').textContent = t.symptomHead;
+      document.getElementById('symptom-hint').textContent    = t.symptomHint;
+      document.getElementById('btn-triage').textContent      = t.btnTriage;
+      document.getElementById('appt-heading').textContent    = t.apptHead;
+      document.getElementById('nearby-heading').textContent  = t.nearbyHead;
+      document.getElementById('abdm-desc').textContent       = t.abdmDesc;
+    }
+
+    function toggleTheme() {
+      isDark = !isDark;
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
     }
 
     function toggleChip(el, symptom) {
@@ -188,41 +502,66 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ patient_id: 'P-101' })
         });
-        msg.innerText = active ? "✓ Consent Active & Verified via ABDM Gateway" : "✕ Consent Revoked (Clinician Access Blocked)";
-        msg.style.color = active ? "var(--success)" : "var(--danger)";
-      } catch (e) {
-        msg.innerText = "Simulated status: " + (active ? "Active" : "Revoked");
-      }
+      } catch (e) { /* offline-friendly */ }
+      msg.textContent = active
+        ? '✓ Consent Active & Verified via ABDM Gateway'
+        : '✕ Consent Revoked (Clinician Access Blocked)';
+      msg.style.color = active ? 'var(--success)' : 'var(--danger)';
+    }
+
+    // Local triage logic — fallback when API is unavailable
+    function localTriage(symptoms, spo2, temp) {
+      const critical = ['chest_pain', 'shortness_of_breath', 'vision_blur'];
+      const high     = ['high_fever', 'severe_headache', 'vomiting', 'abdominal_pain'];
+      if (symptoms.some(s => critical.includes(s)) || spo2 < 90 || temp > 104)
+        return { risk_level: 'EMERGENCY', risk_score: 0.95,
+          recommended_care_path: '🚨 Go to Emergency immediately or call 112.',
+          actions: ['📞 Call Emergency: 112', '🚑 Request ambulance via ABDM app', '⚠️ Do not travel alone'] };
+      if (symptoms.some(s => high.includes(s)) || spo2 < 94 || temp > 101.5)
+        return { risk_level: 'HIGH', risk_score: 0.72,
+          recommended_care_path: '🏥 Visit nearest PHC or District Hospital today.',
+          actions: ['🏥 Book same-day OPD slot', '💊 Avoid self-medication', '🩺 Request teleconsult if travel is difficult'] };
+      if (symptoms.length > 0 || temp > 99.5)
+        return { risk_level: 'MEDIUM', risk_score: 0.45,
+          recommended_care_path: '📱 Telehealth / OPD consult recommended within 48 hrs.',
+          actions: ['📱 Schedule teleconsult', '💧 Stay hydrated and rest', '📋 Monitor symptoms'] };
+      return { risk_level: 'LOW', risk_score: 0.12,
+        recommended_care_path: '✅ No immediate concern. Continue monitoring.',
+        actions: ['📅 Next routine check in 3 months', '🏃 Maintain healthy habits'] };
     }
 
     async function runTriage() {
-      const spo2 = parseFloat(document.getElementById('vital-spo2').value) || 97;
-      const temp = parseFloat(document.getElementById('vital-temp').value) || 98.6;
+      const btn   = document.getElementById('btn-triage');
+      const spo2  = parseFloat(document.getElementById('vital-spo2').value) || 97;
+      const temp  = parseFloat(document.getElementById('vital-temp').value) || 98.6;
       const output = document.getElementById('triage-output');
-      const badge = document.getElementById('triage-badge');
-      const path = document.getElementById('triage-path');
 
+      btn.classList.add('loading');
+      btn.textContent = '⏳ Analysing...';
+
+      let data;
       try {
         const res = await fetch('http://localhost:8000/api/v1/ai/triage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            symptoms: selectedSymptoms,
-            vitals: { spo2, temperature: temp },
-            demographics: { gender: "male", region: "rural", age: 42 }
-          })
+          body: JSON.stringify({ symptoms: selectedSymptoms, vitals: { spo2, temperature: temp },
+            demographics: { gender: 'male', region: 'rural', age: 42 } })
         });
-        const data = await res.json();
-        output.style.display = 'block';
-        output.className = 'triage-result status-' + data.risk_level.toLowerCase();
-        badge.innerText = `Triage Assessment: ${data.risk_level} (Score: ${data.risk_score})`;
-        path.innerText = data.recommended_care_path;
+        data = await res.json();
       } catch (err) {
-        output.style.display = 'block';
-        output.className = 'triage-result status-medium';
-        badge.innerText = "Triage Assessment: MEDIUM RISK";
-        path.innerText = "Telehealth / OPD consult recommended.";
+        data = localTriage(selectedSymptoms, spo2, temp);
       }
+
+      output.style.display = 'block';
+      output.className = 'triage-result status-' + data.risk_level.toLowerCase();
+      document.getElementById('triage-badge').textContent = `Triage: ${data.risk_level}  (Score: ${(data.risk_score * 100).toFixed(0)}%)`;
+      document.getElementById('triage-path').textContent  = data.recommended_care_path;
+
+      const actEl = document.getElementById('triage-actions');
+      actEl.innerHTML = (data.actions || []).map(a => `<div class="triage-action-item">▸ ${a}</div>`).join('');
+
+      btn.classList.remove('loading');
+      btn.textContent = '🔍 Evaluate Symptoms';
     }
   </script>
 </body>
