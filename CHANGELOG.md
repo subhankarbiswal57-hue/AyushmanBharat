@@ -1,22 +1,37 @@
 # Changelog
 
-All notable changes to the Ayushman Bharat Healthtech Platform are documented here.
-Format follows [Keep a Changelog](https://keepachangelog.com/).
+All notable changes to the Ayushman Bharat Digital Health Platform are documented here.
+Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Semantic Versioning.
 
-## [Unreleased]
+---
+
+## [2.1.0] - 2026-10-05
 
 ### Added
-- Central documentation index linking all platform guides (`docs/INDEX.md`).
-- System architecture diagram with mermaid and architectural pillars (`docs/ARCHITECTURE.md`).
-- ABDM M1-M3 milestone integration guide for ABHA and Consent Manager (`docs/ABDM_INTEGRATION.md`).
-- REST and FHIR R4 API endpoint reference (`docs/API_REFERENCE.md`).
-- Security and privacy architecture with tamper-evident audit ledger (`docs/SECURITY.md`).
-- AI/ML clinical triage pipeline and algorithmic fairness thresholds (`docs/AI_ML_GUIDE.md`).
-- QA strategy covering integration and bias/fairness test suites (`docs/TESTING_GUIDE.md`).
-- Docker Compose and Kubernetes deployment blueprint with DR plan (`docs/DEPLOYMENT.md`).
-- Contributing guidelines with branching strategy and commit conventions (`CONTRIBUTING.md`).
-- This changelog (`CHANGELOG.md`).
+- **Structured JSON Logger**: `shared/logger.py` with ISO-8601 timestamps, correlation IDs, and DPDP-compliant PHI data masking.
+- **In-Memory TTLCache**: `shared/cache.py` thread-safe LRU cache with hit-rate telemetry for frequent triage assessments.
+- **Cryptographic Utility Suite**: `shared/crypto.py` for field-level encryption, deterministic ABHA pseudonymization, and HMAC audit signing.
+- **Clinician Triage Modernization**: Redesigned `apps/clinician-frontend/index.html` with Inter typography, dark mode, patient search, and FHIR export.
+- **Audit Ledger Query Filters**: Added filtering by `actor_id` and `action` to `services/audit-logging/main.py`.
+- **Reusable Pagination**: `shared/pagination.py` models for standardized offset/limit API lists.
+- **Validation Test Suite**: `tests/test_validators.py` unit tests with 100% pass rate for domain validators.
+- **Progressive Web App Support**: `manifest.json` and service worker `sw.js` for offline clinical workflows.
+- **Enhanced Architecture Docs**: Extended `docs/ARCHITECTURE.md` with microservice topologies and DPDP compliance matrix.
+
+---
+
+## [2.0.0] - 2026-10-04
+
+### Added
+- Comprehensive README rewrite with architecture diagram and AI/ML pipeline flowchart.
+- Unified Governance Console redesign in `apps/admin-dashboard/index.html`.
+- Unified `HealthChecker` endpoint in `shared/health.py`.
+- Expanded `.gitignore` covering SQLite DBs, environment keys, and ML models.
+- Production-pinned `requirements.txt` with security audit compliance.
+- Redesigned Beneficiary Patient Portal with dark mode and 12 symptom chips.
+
+---
 
 ## [1.1.0] - 2026-10-03
-- Added multi-language support for Hindi and Bengali
-- Improved patient onboarding flow
+- Added multi-language support for Hindi and Bengali.
+- Improved patient onboarding and ABHA registration flow.
