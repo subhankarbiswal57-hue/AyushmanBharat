@@ -1,14 +1,65 @@
+# ── Python ──────────────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
-.env
+*.pyd
 *.egg-info/
 dist/
 build/
+*.egg
+.eggs/
+
+# ── Virtual Environments ─────────────────────────────────────────────────────
 .venv/
 venv/
+env/
+ENV/
 
-# Test artifacts
+# ── Secrets & Environment ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+
+# ── Databases ────────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Logs & Test Artifacts ────────────────────────────────────────────────────
+*.log
+*.log.*
+logs/
 .pytest_cache/
 coverage.xml
-*.log
+htmlcov/
+.coverage
+.coverage.*
+
+# ── ML Model Artifacts ───────────────────────────────────────────────────────
+*.joblib
+*.pkl
+*.h5
+*.pt
+*.onnx
+models/checkpoints/
+
+# ── OS & IDE ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── Docker ───────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Node (admin/clinician frontends) ─────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
