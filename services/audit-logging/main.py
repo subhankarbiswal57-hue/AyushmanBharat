@@ -149,14 +149,33 @@ def record_log(req: AuditEventRequest):
     return {"message": "Audit event recorded", "event": evt}
 
 @app.get("/audit/events")
-def list_logs(limit: int = 50):
-    records = get_audit_records(limit=limit)
+def list_logs(limit: int = 50, actor_id: str = None, action: str = None):
     conn = get_db_connection()
     cursor = conn.cursor()
+    query = "SELECT * FROM audit_ledger WHERE 1=1"
+    params = []
+    if actor_id:
+        query += " AND actor_id = ?"
+        params.append(actor_id)
+    if action:
+        query += " AND action = ?"
+        params.append(action)
+    query += " ORDER BY id DESC LIMIT ?"
+    params.append(limit)
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    
+    # Total count
     cursor.execute("SELECT COUNT(*) FROM audit_ledger")
-    count = cursor.fetchone()[0]
+    total_count = cursor.fetchone()[0]
     conn.close()
-    return {"events": records, "total": count}
+
+    events = []
+    for r in rows:
+        d = dict(r)
+        d["details"] = json.loads(d.get("details") or "{}")
+        events.append(d)
+    return {"events": events, "total": total_count, "returned": len(events)}
 
 @app.get("/audit/verify")
 def verify_ledger():
