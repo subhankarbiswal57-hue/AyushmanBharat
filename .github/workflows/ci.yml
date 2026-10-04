@@ -2,31 +2,166 @@ name: Ayushman Bharat CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
+# Cancel in-progress runs for the same branch when a new push arrives
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test-and-verify:
+  # ── 1. Lint & Static Analysis ─────────────────────────────────────────────
+  lint:
+    name: Lint & Static Analysis
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install lint tools
+        run: pip install flake8 bandit
+
+      - name: Run flake8 (style + syntax)
+        run: |
+          flake8 services/ shared/ ai_ml/ \
+            --max-line-length=100 \
+            --ignore=E501,W503 \
+            --exclude=__pycache__,*.pyc,venv \
+            --statistics
+
+      - name: Run bandit (security scan)
+        run: |
+          bandit -r services/ shared/ ai_ml/ \
+            -ll \
+            --exclude .venv,tests \
+            -f txt
+
+  # ── 2. Unit Tests ─────────────────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install fastapi uvicorn pydantic python-dotenv pyjwt bcrypt passlib scikit-learn joblib httpx pytest requests
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Train Clinical Triage ML Model
-      run: |
-        python ai_ml/models/train.py
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/ \
+            --ignore=tests/integration_test.py \
+            -v \
+            --tb=short \
+            --cov=shared \
+            --cov=services \
+            --cov-report=xml \
+            --cov-report=term-missing
 
-    - name: Run End-to-End Test Suite
-      run: |
-        python -m unittest discover -s tests -p "*test*.py"
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: matrix.python-version == '3.11'
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ── 3. ML Model Training ──────────────────────────────────────────────────
+  ml-model:
+    name: Train & Validate ML Triage Model
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install ML dependencies
+        run: |
+          pip install scikit-learn numpy pandas joblib shap
+
+      - name: Train Clinical Triage ML Model
+        run: python ai_ml/models/train.py
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-model
+          path: ai_ml/models/triage_model.joblib
+          retention-days: 7
+
+  # ── 4. Integration Tests ──────────────────────────────────────────────────
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests, ml-model]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download trained model
+        uses: actions/download-artifact@v4
+        with:
+          name: triage-model
+          path: ai_ml/models/
+
+      - name: Run full integration test suite
+        run: |
+          python -m pytest tests/integration_test.py -v --tb=short
+
+  # ── 5. Security Audit ─────────────────────────────────────────────────────
+  security:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit dependencies for known CVEs
+        run: |
+          pip install -r requirements.txt
+          pip-audit --require-hashes=false --fix=false
