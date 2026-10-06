@@ -58,3 +58,44 @@ def evaluate_data_drift(historical_records: List[Dict[str, Any]]) -> Dict[str, A
         "current_samples": len(current),
         "recommendation": "Retrain model with recent population data" if drift_detected else "Model distribution within tolerance"
     }
+
+def evaluate_feature_drift(historical_records: List[Dict[str, Any]], features: List[str] = None) -> Dict[str, Any]:
+    """
+    Computes drift across individual physiological and demographic features.
+    Standard features evaluated: heart_rate, spo2, systolic_bp, diastolic_bp, temperature, age.
+    """
+    if features is None:
+        features = ["heart_rate", "spo2", "systolic_bp", "diastolic_bp", "temperature", "age"]
+
+    if len(historical_records) < 10:
+        return {
+            "status": "INSUFFICIENT_SAMPLES",
+            "feature_metrics": {},
+            "features_with_drift": []
+        }
+
+    mid = len(historical_records) // 2
+    results = {}
+    drifting_features = []
+
+    for feat in features:
+        base_vals = [float(r.get(feat, 0)) for r in historical_records[:mid] if r.get(feat) is not None]
+        curr_vals = [float(r.get(feat, 0)) for r in historical_records[mid:] if r.get(feat) is not None]
+
+        if len(base_vals) >= 5 and len(curr_vals) >= 5:
+            feat_psi = calculate_psi(base_vals, curr_vals)
+            has_drift = feat_psi >= 0.20
+            results[feat] = {
+                "psi": feat_psi,
+                "drift": has_drift,
+                "status": "DRIFT" if has_drift else ("WARNING" if feat_psi >= 0.1 else "STABLE")
+            }
+            if has_drift:
+                drifting_features.append(feat)
+
+    return {
+        "status": "DRIFT_DETECTED" if len(drifting_features) > 0 else "STABLE",
+        "feature_metrics": results,
+        "features_with_drift": drifting_features
+    }
+
