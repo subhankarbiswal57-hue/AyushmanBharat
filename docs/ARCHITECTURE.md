@@ -80,6 +80,26 @@ graph TD
 
 ## 4. Resilience & Offline-First Strategy
 
-- **Service Workers**: Static shell assets and critical triage decision trees cached locally in client browsers.
+- **Service Workers & PWA**: Static shell assets and critical triage decision trees cached locally in client browsers.
+- **IndexedDB Sync Engine**: Encounters and vitals queued locally in offline mode with automatic synchronization upon reconnection.
 - **TTLCache Layer**: High-frequency symptom-condition lookups cached in-memory with thread-safe locks.
 - **Graceful Fallbacks**: Web applications automatically switch to local simulated responses if backends are unreachable.
+
+---
+
+## 5. Health Information Exchange (HIE) & Standards Interoperability
+
+Ayushman Bharat adheres to the **Ayushman Bharat Digital Mission (ABDM)** National Digital Health Blueprint:
+
+1. **FHIR R4 Standardized Resource Models**:
+   - `Patient`: Demographics, ABDM identity, consent state, and multi-language preference.
+   - `Observation`: LOINC-coded physiological vitals (SpO2, heart rate, blood pressure, temperature).
+   - `Condition`: SNOMED CT clinical findings with ICD-10 cross-referencing.
+   - `Encounter`: Ambulatory (`AMB`) vs Inpatient (`IMP`) classification with timestamped audit footprints.
+   - `Bundle`: Standardized batch collection envelope for interoperable health record transfer.
+
+2. **Clinical Terminology & Coding Standards**:
+   - Primary Clinical Findings & Disorders: **SNOMED CT**
+   - Laboratory & Vital Observations: **LOINC**
+   - Health Identifier: **ABHA 14-Digit Standard**
+
