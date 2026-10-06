@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 
 ---
 
+## [2.3.0] - 2026-10-07
+
+### Added
+- **C-CDA XML Section & Observation Parser**: Upgraded `services/api_gateway/cda_parser/parser.py` with structured section and vital sign extraction.
+- **ABDM Sandbox M1-M3 Milestones**: Implemented verification, care context linking, and consent artefact validation in `services/api_gateway/external_provider_sync/abdm_sync.py`.
+- **Clinical Alert Fatigue Reducer**: Added `apps/clinician-frontend/src/alerts/fatigue_reducer.js` with NEWS2 scoring and cooldown deduplication.
+- **SMART-on-FHIR EHR Embed Bridge**: Added PostMessage bridge `apps/clinician-frontend/src/ehr-embed/ehr_bridge.js` for zero-context-switching hospital EHR embeds.
+- **DPDP Consent Lifecycle Controller**: Added statutory purpose enforcement and immediate revocation in `apps/admin-dashboard/src/consent-management/consent_controller.js`.
+- **Accessibility & Low-Literacy Engine**: Added high-contrast mode, scalable typography, and speech synthesis in `apps/patient-frontend/src/accessibility/a11y_helper.js`.
+- **Guided Low-Digital-Literacy Onboarding**: Added step-by-step ABHA registration wizard in `apps/patient-frontend/src/onboarding/guided_wizard.js`.
+- **WCAG 2.1 AAA Design Tokens**: Created `shared/design-system/tokens.css` with high-contrast palette and 48px minimum touch targets.
+- **Clinical Unit Tests**: Created `tests/test_clinical_modules.py` covering C-CDA XML parsing and ABDM sync workflows.
+
+---
+
 ## [2.2.0] - 2026-10-06
 
 ### Added
