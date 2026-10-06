@@ -158,9 +158,44 @@ def list_logs(limit: int = 50):
     conn.close()
     return {"events": records, "total": count}
 
-@app.get("/audit/verify")
-def verify_ledger():
-    return verify_audit_ledger_db()
+@app.get("/audit/export/json")
+def export_audit_json(limit: int = 500):
+    """Exports audit logs in standardized JSON format for compliance archiving."""
+    records = get_audit_records(limit=limit)
+    return {
+        "export_timestamp": time.time(),
+        "record_count": len(records),
+        "data": records
+    }
+
+@app.get("/audit/export/csv")
+def export_audit_csv(limit: int = 500):
+    """Exports audit trail records as CSV text for statutory DPDP compliance inspection."""
+    import csv
+    import io
+    from fastapi.responses import Response
+
+    records = get_audit_records(limit=limit)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["event_id", "timestamp", "action", "actor_id", "actor_role", "target_resource_id", "resource_type", "record_hash", "prev_hash"])
+    for r in records:
+        writer.writerow([
+            r.get("event_id"),
+            r.get("timestamp"),
+            r.get("action"),
+            r.get("actor_id"),
+            r.get("actor_role"),
+            r.get("target_resource_id"),
+            r.get("resource_type"),
+            r.get("record_hash"),
+            r.get("prev_hash")
+        ])
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=audit_ledger_export.csv"}
+    )
 
 def run_server(port=AUDIT_PORT):
     uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
