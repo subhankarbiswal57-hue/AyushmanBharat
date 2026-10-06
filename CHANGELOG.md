@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 
 ---
 
+## [2.2.0] - 2026-10-06
+
+### Added
+- **FHIR R4 Resource Extensions**: Added full `Condition`, `Encounter`, and `Bundle` builders to `services/api_gateway/fhir/mapper.py`.
+- **SNOMED CT Clinical Catalog Expansion**: Enriched terminology mappings with communicable (Malaria, Dengue, TB, Typhoid) and chronic conditions, plus keyword search & batch mapping APIs.
+- **Audit Ledger Compliance Exports**: Added `/audit/export/json` and `/audit/export/csv` endpoints for statutory DPDP compliance archival and audits.
+- **Feature-Level PSI Drift Tracking**: Extended `ai_ml/drift_detection/psi.py` to evaluate drift across physiological vitals (SpO2, heart rate, blood pressure, temperature, age).
+- **Token Revocation & Refresh Token Lifecycle**: Added long-lived refresh tokens and an in-memory revocation blacklist to `shared/security.py`.
+- **Multilingual i18n Engine**: Added comprehensive English, Hindi, and Odia translation dictionaries and `I18nManager` to `apps/patient-frontend/src/i18n/translations.js`.
+- **Offline Storage & Background Sync**: Added IndexedDB queue manager with automated reconnection sync in `apps/patient-frontend/src/offline-fallback/sync_manager.js`.
+- **Interoperability Test Suite**: Created `tests/test_fhir_snomed.py` with 6 automated tests covering FHIR mappings and SNOMED searches.
+- **HIE & ABDM Architecture Documentation**: Expanded `docs/ARCHITECTURE.md` with ABDM National Digital Health Blueprint specifications.
+
+---
+
 ## [2.1.0] - 2026-10-05
 
 ### Added
