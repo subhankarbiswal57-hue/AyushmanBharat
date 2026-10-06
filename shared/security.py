@@ -86,3 +86,28 @@ except ImportError:
             return payload
         except Exception:
             return None
+
+# In-memory Token Revocation Blacklist
+_REVOKED_TOKENS = set()
+
+def create_refresh_token(payload: Dict[str, Any], expires_days: int = 7) -> str:
+    """Issues a high-entropy long-lived refresh token (7 days default)."""
+    refresh_payload = payload.copy()
+    refresh_payload["token_type"] = "refresh"
+    return create_jwt_token(refresh_payload, expires_delta=expires_days * 86400)
+
+def revoke_token(token: str) -> None:
+    """Adds a token to the revoked token blacklist."""
+    if token:
+        _REVOKED_TOKENS.add(token)
+
+def is_token_revoked(token: str) -> bool:
+    """Checks whether a token has been explicitly invalidated before expiration."""
+    return token in _REVOKED_TOKENS
+
+def verify_and_check_token(token: str) -> Optional[Dict[str, Any]]:
+    """Decodes token and verifies it has not been revoked."""
+    if is_token_revoked(token):
+        return None
+    return decode_jwt_token(token)
+
