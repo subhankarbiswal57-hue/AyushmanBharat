@@ -12,3 +12,5 @@
 ## Sprint 3 Notes
 - API rate limiting added to /enroll endpoint
 - DB indexing optimized for beneficiary lookup
+
+- Milestone: successfully integrated ABDM, FHIR R4, and accessibility systems.
