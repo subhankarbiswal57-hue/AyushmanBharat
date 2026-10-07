@@ -155,3 +155,9 @@ class AuditRecord:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
+
+class StandardErrorResponse(BaseModel):
+    error_code: str
+    message: str
+    timestamp: float
