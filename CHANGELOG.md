@@ -65,3 +65,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 ## [1.1.0] - 2026-10-03
 - Added multi-language support for Hindi and Bengali.
 - Improved patient onboarding and ABHA registration flow.
+
+## [2.4.0] - 2026-10-08
+### Added
+- Added Redis cache environment configuration.
+- Added system health constants and ClinicalSeverity type definitions.
+- Added StandardErrorResponse schema model.
+- Documented REST API versioning guidelines.
