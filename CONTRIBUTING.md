@@ -28,3 +28,6 @@ All contributors must adhere to respectful, inclusive communication. Healthcare 
 ## Code Review Checklist
 - Ensure all API responses include error codes
 - Run pytest tests/ before submitting PR
+
+### Commit Guidelines
+Follow Conventional Commits (feat, fix, docs, chore, test).
