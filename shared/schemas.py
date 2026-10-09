@@ -166,3 +166,9 @@ class StandardErrorResponse(BaseModel):
 class HealthStatusResponse:
     status: str = 'ok'
 
+
+# Pagination query filter schema
+class PaginationFilter:
+    page: int = 1
+    limit: int = 20
+
