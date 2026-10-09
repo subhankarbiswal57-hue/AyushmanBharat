@@ -78,3 +78,5 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 - Added standard AuditAction enum definitions.
 
 - Added TelemetryCategory enum.
+
+- Added UserRole types and rate limiting documentation.
