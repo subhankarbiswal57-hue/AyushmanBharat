@@ -12,3 +12,10 @@ class AuditAction:
     UPDATE = 'UPDATE'
     DELETE = 'DELETE'
 
+
+# Telemetry event categories
+class TelemetryCategory:
+    AUTH = 'AUTH'
+    TRANSACTION = 'TRANSACTION'
+    SECURITY = 'SECURITY'
+
