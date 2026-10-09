@@ -72,3 +72,5 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 - Added system health constants and ClinicalSeverity type definitions.
 - Added StandardErrorResponse schema model.
 - Documented REST API versioning guidelines.
+
+- Added VerificationStatus constants.
