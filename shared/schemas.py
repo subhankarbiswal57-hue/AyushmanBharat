@@ -161,3 +161,8 @@ class StandardErrorResponse(BaseModel):
     error_code: str
     message: str
     timestamp: float
+
+# Health check response model stub
+class HealthStatusResponse:
+    status: str = 'ok'
+
