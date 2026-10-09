@@ -20,3 +20,5 @@
 - Check: Audit log format reviewed.
 
 - Status: Baseline maintenance batch completed successfully.
+
+- Task: Commencing auxiliary service telemetry review.
