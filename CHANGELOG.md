@@ -76,3 +76,5 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 - Added VerificationStatus constants.
 
 - Added standard AuditAction enum definitions.
+
+- Added TelemetryCategory enum.
