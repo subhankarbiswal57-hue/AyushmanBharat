@@ -5,3 +5,10 @@ class VerificationStatus:
     VERIFIED = 'VERIFIED'
     REJECTED = 'REJECTED'
 
+
+# Audit action codes
+class AuditAction:
+    CREATE = 'CREATE'
+    UPDATE = 'UPDATE'
+    DELETE = 'DELETE'
+
