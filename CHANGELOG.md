@@ -74,3 +74,5 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 - Documented REST API versioning guidelines.
 
 - Added VerificationStatus constants.
+
+- Added standard AuditAction enum definitions.
