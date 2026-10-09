@@ -19,3 +19,10 @@ class TelemetryCategory:
     TRANSACTION = 'TRANSACTION'
     SECURITY = 'SECURITY'
 
+
+# Role definitions
+class UserRole:
+    ADMIN = 'ADMIN'
+    OPERATOR = 'OPERATOR'
+    AUDITOR = 'AUDITOR'
+
