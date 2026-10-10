@@ -31,3 +31,6 @@ All contributors must adhere to respectful, inclusive communication. Healthcare 
 
 ### Commit Guidelines
 Follow Conventional Commits (feat, fix, docs, chore, test).
+
+<!-- note: use descriptive commit messages adhering to conventional commits -->
+
