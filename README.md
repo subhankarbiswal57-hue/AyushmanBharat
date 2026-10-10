@@ -260,3 +260,6 @@ bandit -r services/ shared/ ai_ml/ -ll
 ---
 
 *Built with ❤️ for Bharat · ABDM Compliant · DPDP Act 2023 · Open Source*
+
+<!-- note: ensure virtual environment is activated before running tests -->
+
