@@ -80,3 +80,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 - Added TelemetryCategory enum.
 
 - Added UserRole types and rate limiting documentation.
+
+- docs: refine contribution and setup references
+
