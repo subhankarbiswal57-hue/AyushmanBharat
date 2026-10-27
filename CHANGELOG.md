@@ -5,6 +5,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Expanded Access Roles**: Introduced CLINICIAN and BENEFICIARY roles to shared/types.py.
+- **Adjudication Lifecycles**: Defined standard claim processing status constants in shared/constants.py.
+- **Health SLA Standards**: Specified SLA requirements and encryption protocols in API and security documentation.
+
+---
+
 ## [2.3.0] - 2026-10-07
 
 ### Added
