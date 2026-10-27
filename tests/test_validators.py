@@ -91,5 +91,11 @@ class TestValidators(unittest.TestCase):
         self.assertFalse(valid)
 
 
+    def test_user_roles(self):
+        from shared.types import UserRole
+        self.assertEqual(UserRole.CLINICIAN, "CLINICIAN")
+        self.assertEqual(UserRole.BENEFICIARY, "BENEFICIARY")
+
+
 if __name__ == "__main__":
     unittest.main()
