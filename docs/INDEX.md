@@ -11,3 +11,8 @@ Welcome to the **Ayushman Bharat Digital Health & Care Infrastructure** document
 5. **[AI/ML Risk Scoring & Algorithmic Fairness](AI_ML_GUIDE.md)**: Clinical risk scoring pipelines, bias mitigation, and SHAP explainability.
 6. **[Testing & Quality Assurance Guide](TESTING_GUIDE.md)**: Unit tests, synthetic patient data generation, and end-to-end integration validation.
 7. **[Deployment & Cloud Infrastructure](DEPLOYMENT.md)**: Docker Compose orchestration, Kubernetes blueprints, and disaster recovery.
+
+## API Guides
+- [API Endpoints Reference](API_ENDPOINTS.md)
+- [API Conventions](API_CONVENTIONS.md)
+- [API Versioning Policy](API_VERSIONING.md)
