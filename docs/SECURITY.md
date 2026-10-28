@@ -10,3 +10,8 @@ Please report security issues to security@ayushman.gov.in
 ## Encryption Standards
 - In-transit: TLS 1.3 enforced on all external endpoints
 - At-rest: AES-256-GCM for sensitive health and identity fields
+
+## DPDP Act 2023 Statutory Compliance
+- Purpose Limitation: Data collected strictly per specified consent purpose
+- Data Principal Rights: Support for access, rectification, and erasure
+- Breach Notification: Mandatory 72-hour CERT-In & Board notification
