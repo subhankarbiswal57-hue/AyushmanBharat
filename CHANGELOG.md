@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 ## [Unreleased]
 
 ### Added
+- **Pulse Rate Validation & Consent Lifecycles**: Added validate_pulse_rate, ConsentStatus models, and ABDM M1-M3 milestone definitions.
 - **Expanded Access Roles**: Introduced CLINICIAN and BENEFICIARY roles to shared/types.py.
 - **Adjudication Lifecycles**: Defined standard claim processing status constants in shared/constants.py.
 - **Health SLA Standards**: Specified SLA requirements and encryption protocols in API and security documentation.
@@ -17,6 +18,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 ## [2.3.0] - 2026-10-07
 
 ### Added
+- **Pulse Rate Validation & Consent Lifecycles**: Added validate_pulse_rate, ConsentStatus models, and ABDM M1-M3 milestone definitions.
 - **C-CDA XML Section & Observation Parser**: Upgraded `services/api_gateway/cda_parser/parser.py` with structured section and vital sign extraction.
 - **ABDM Sandbox M1-M3 Milestones**: Implemented verification, care context linking, and consent artefact validation in `services/api_gateway/external_provider_sync/abdm_sync.py`.
 - **Clinical Alert Fatigue Reducer**: Added `apps/clinician-frontend/src/alerts/fatigue_reducer.js` with NEWS2 scoring and cooldown deduplication.
@@ -32,6 +34,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 ## [2.2.0] - 2026-10-06
 
 ### Added
+- **Pulse Rate Validation & Consent Lifecycles**: Added validate_pulse_rate, ConsentStatus models, and ABDM M1-M3 milestone definitions.
 - **FHIR R4 Resource Extensions**: Added full `Condition`, `Encounter`, and `Bundle` builders to `services/api_gateway/fhir/mapper.py`.
 - **SNOMED CT Clinical Catalog Expansion**: Enriched terminology mappings with communicable (Malaria, Dengue, TB, Typhoid) and chronic conditions, plus keyword search & batch mapping APIs.
 - **Audit Ledger Compliance Exports**: Added `/audit/export/json` and `/audit/export/csv` endpoints for statutory DPDP compliance archival and audits.
@@ -47,6 +50,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 ## [2.1.0] - 2026-10-05
 
 ### Added
+- **Pulse Rate Validation & Consent Lifecycles**: Added validate_pulse_rate, ConsentStatus models, and ABDM M1-M3 milestone definitions.
 - **Structured JSON Logger**: `shared/logger.py` with ISO-8601 timestamps, correlation IDs, and DPDP-compliant PHI data masking.
 - **In-Memory TTLCache**: `shared/cache.py` thread-safe LRU cache with hit-rate telemetry for frequent triage assessments.
 - **Cryptographic Utility Suite**: `shared/crypto.py` for field-level encryption, deterministic ABHA pseudonymization, and HMAC audit signing.
@@ -62,6 +66,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 ## [2.0.0] - 2026-10-04
 
 ### Added
+- **Pulse Rate Validation & Consent Lifecycles**: Added validate_pulse_rate, ConsentStatus models, and ABDM M1-M3 milestone definitions.
 - Comprehensive README rewrite with architecture diagram and AI/ML pipeline flowchart.
 - Unified Governance Console redesign in `apps/admin-dashboard/index.html`.
 - Unified `HealthChecker` endpoint in `shared/health.py`.
@@ -77,6 +82,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 
 ## [2.4.0] - 2026-10-08
 ### Added
+- **Pulse Rate Validation & Consent Lifecycles**: Added validate_pulse_rate, ConsentStatus models, and ABDM M1-M3 milestone definitions.
 - Added Redis cache environment configuration.
 - Added system health constants and ClinicalSeverity type definitions.
 - Added StandardErrorResponse schema model.
