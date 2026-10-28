@@ -16,3 +16,4 @@ Welcome to the **Ayushman Bharat Digital Health & Care Infrastructure** document
 - [API Endpoints Reference](API_ENDPOINTS.md)
 - [API Conventions](API_CONVENTIONS.md)
 - [API Versioning Policy](API_VERSIONING.md)
+- [Security & DPDP Compliance](SECURITY.md)
