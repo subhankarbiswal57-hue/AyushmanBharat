@@ -28,3 +28,11 @@ class UserRole:
     CLINICIAN = 'CLINICIAN'
     BENEFICIARY = 'BENEFICIARY'
 
+
+# Consent Status lifecycles
+class ConsentStatus:
+    REQUESTED = 'REQUESTED'
+    GRANTED = 'GRANTED'
+    DENIED = 'DENIED'
+    REVOKED = 'REVOKED'
+    EXPIRED = 'EXPIRED'
