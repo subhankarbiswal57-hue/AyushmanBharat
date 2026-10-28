@@ -8,3 +8,4 @@
 - Rate limits return 429 Too Many Requests with Retry-After header.
 
 - Healthcheck endpoints (/health, /live, /ready) must return 200 OK within 200ms.
+- Idempotency: All POST mutation endpoints support Idempotency-Key headers.
