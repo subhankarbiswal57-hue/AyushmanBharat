@@ -190,3 +190,13 @@ def validate_age(age: int) -> ValidResult:
     if not (0 <= val <= 130):
         return False, f"Age {val} is outside the valid range (0–130)."
     return True, None
+
+# -- Heart Rate (Pulse) --
+def validate_pulse_rate(bpm: int) -> ValidResult:
+    try:
+        val = int(bpm)
+    except (TypeError, ValueError):
+        return False, 'Pulse rate must be a numeric integer value.'
+    if not (30 <= val <= 250):
+        return False, f'Pulse rate {val} bpm is outside physiological range (30-250 bpm).'
+    return True, None
