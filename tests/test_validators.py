@@ -97,5 +97,17 @@ class TestValidators(unittest.TestCase):
         self.assertEqual(UserRole.BENEFICIARY, "BENEFICIARY")
 
 
+    def test_pulse_rate_validation(self):
+        from shared.validators import validate_pulse_rate
+        valid, _ = validate_pulse_rate(72)
+        self.assertTrue(valid)
+        valid, msg = validate_pulse_rate(20)
+        self.assertFalse(valid)
+        valid, msg = validate_pulse_rate(300)
+        self.assertFalse(valid)
+        valid, msg = validate_pulse_rate('abc')
+        self.assertFalse(valid)
+
+
 if __name__ == "__main__":
     unittest.main()
