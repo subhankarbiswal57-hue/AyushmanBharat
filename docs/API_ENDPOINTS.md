@@ -8,3 +8,6 @@
 | GET | /api/v1/claim/{id}/status | Check claim adjudication status |
 | PUT | /api/v1/claim/{id} | Update claim status |
 | GET | /api/v1/hospitals | List empanelled hospitals |
+| POST | /api/v1/consent/request | Initiate DPDP statutory consent request |
+| GET | /api/v1/consent/{id} | Retrieve consent artefact details |
+| POST | /api/v1/consent/{id}/revoke | Revoke active patient consent |
