@@ -17,3 +17,5 @@ Welcome to the **Ayushman Bharat Digital Health & Care Infrastructure** document
 - [API Conventions](API_CONVENTIONS.md)
 - [API Versioning Policy](API_VERSIONING.md)
 - [Security & DPDP Compliance](SECURITY.md)
+
+- [Consent Management & Governance Guide](SECURITY.md): Guidelines on patient consent tokens, revocation lifecycles, and audit compliance.
