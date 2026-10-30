@@ -36,3 +36,10 @@ class ConsentStatus:
     DENIED = 'DENIED'
     REVOKED = 'REVOKED'
     EXPIRED = 'EXPIRED'
+
+# ABHA Authentication Modes
+class ABHAMode:
+    MOBILE_OTP = 'MOBILE_OTP'
+    AADHAAR_OTP = 'AADHAAR_OTP'
+    DEMOGRAPHICS = 'DEMOGRAPHICS'
+    PASSWORD = 'PASSWORD'
