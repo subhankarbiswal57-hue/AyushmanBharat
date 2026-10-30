@@ -31,3 +31,5 @@
 - [x] periodic maintenance and documentation audit completed
 - Summary: Completed 10-commit enhancement sprint on domain types, claim constants, security SLAs, and API documentation.
 - Update: Completed pulse rate validation, ABDM milestones, and DPDP compliance documentation.
+
+- Milestone: Expanded clinical parameter validation rules for telemetry ingestion and ABDM registry identifiers.
