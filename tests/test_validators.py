@@ -120,3 +120,12 @@ if __name__ == "__main__":
         self.assertFalse(validate_respiratory_rate(75))
         self.assertFalse(validate_respiratory_rate('16'))
         self.assertFalse(validate_respiratory_rate(True))
+
+    def test_body_temperature_validation(self):
+        from shared.validators import validate_body_temperature
+        self.assertTrue(validate_body_temperature(37.0))
+        self.assertTrue(validate_body_temperature(36.5))
+        self.assertFalse(validate_body_temperature(29.0))
+        self.assertFalse(validate_body_temperature(45.0))
+        self.assertFalse(validate_body_temperature('37.0'))
+        self.assertFalse(validate_body_temperature(True))
