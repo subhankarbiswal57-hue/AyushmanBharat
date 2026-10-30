@@ -33,3 +33,5 @@
 - Update: Completed pulse rate validation, ABDM milestones, and DPDP compliance documentation.
 
 - Milestone: Expanded clinical parameter validation rules for telemetry ingestion and ABDM registry identifiers.
+
+- Sync: Verified 30 unit tests passing across shared types, validators, rate limiters, and FHIR modules.
