@@ -206,3 +206,9 @@ def validate_respiratory_rate(rpm: float) -> bool:
     if isinstance(rpm, bool):
         return False
     return isinstance(rpm, (int, float)) and 8.0 <= float(rpm) <= 60.0
+
+def validate_body_temperature(temp_celsius: float) -> bool:
+    """Validate body temperature in Celsius (physiological range 32.0 to 43.0 C)."""
+    if isinstance(temp_celsius, bool):
+        return False
+    return isinstance(temp_celsius, (int, float)) and 32.0 <= float(temp_celsius) <= 43.0
