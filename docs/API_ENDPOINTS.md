@@ -11,3 +11,7 @@
 | POST | /api/v1/consent/request | Initiate DPDP statutory consent request |
 | GET | /api/v1/consent/{id} | Retrieve consent artefact details |
 | POST | /api/v1/consent/{id}/revoke | Revoke active patient consent |
+
+### Health Facility Registry (HFR) Endpoints
+- `GET /api/v1/hfr/facilities`: Search registered healthcare facilities by pincode and district.
+- `GET /api/v1/hfr/facilities/{facility_id}`: Retrieve detailed facility profile and verified department metadata.
