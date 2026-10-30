@@ -212,3 +212,9 @@ def validate_body_temperature(temp_celsius: float) -> bool:
     if isinstance(temp_celsius, bool):
         return False
     return isinstance(temp_celsius, (int, float)) and 32.0 <= float(temp_celsius) <= 43.0
+
+def validate_oxygen_saturation(spo2_pct: float) -> bool:
+    """Validate blood oxygen saturation percentage (range 50 to 100%)."""
+    if isinstance(spo2_pct, bool):
+        return False
+    return isinstance(spo2_pct, (int, float)) and 50.0 <= float(spo2_pct) <= 100.0
