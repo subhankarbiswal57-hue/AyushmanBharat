@@ -129,3 +129,12 @@ if __name__ == "__main__":
         self.assertFalse(validate_body_temperature(45.0))
         self.assertFalse(validate_body_temperature('37.0'))
         self.assertFalse(validate_body_temperature(True))
+
+    def test_oxygen_saturation_validation(self):
+        from shared.validators import validate_oxygen_saturation
+        self.assertTrue(validate_oxygen_saturation(98.0))
+        self.assertTrue(validate_oxygen_saturation(92))
+        self.assertFalse(validate_oxygen_saturation(40))
+        self.assertFalse(validate_oxygen_saturation(105))
+        self.assertFalse(validate_oxygen_saturation('98'))
+        self.assertFalse(validate_oxygen_saturation(True))
