@@ -15,3 +15,7 @@
 ### Health Facility Registry (HFR) Endpoints
 - `GET /api/v1/hfr/facilities`: Search registered healthcare facilities by pincode and district.
 - `GET /api/v1/hfr/facilities/{facility_id}`: Retrieve detailed facility profile and verified department metadata.
+
+### Healthcare Professional Registry (HPR) Endpoints
+- `GET /api/v1/hpr/professionals/{hpr_id}`: Retrieve professional registration and council credentials.
+- `POST /api/v1/hpr/verify`: Verify practitioner registration against state medical council registries.
