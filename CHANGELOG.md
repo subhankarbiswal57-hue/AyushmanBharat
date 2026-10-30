@@ -98,3 +98,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to Se
 
 - docs: refine contribution and setup references
 
+
+### Added (ABDM Integration & Clinical Vital Validators)
+- Introduced respiratory rate, body temperature, and oxygen saturation vital sign validators.
+- Added HFR and HPR constant registries and care context enumerations.
+- Documented data retention, cryptographic audit integrity, and pagination conventions.
