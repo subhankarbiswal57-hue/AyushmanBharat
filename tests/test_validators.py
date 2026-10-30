@@ -111,3 +111,12 @@ class TestValidators(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_respiratory_rate_validation(self):
+        from shared.validators import validate_respiratory_rate
+        self.assertTrue(validate_respiratory_rate(16))
+        self.assertTrue(validate_respiratory_rate(12.5))
+        self.assertFalse(validate_respiratory_rate(4))
+        self.assertFalse(validate_respiratory_rate(75))
+        self.assertFalse(validate_respiratory_rate('16'))
+        self.assertFalse(validate_respiratory_rate(True))
