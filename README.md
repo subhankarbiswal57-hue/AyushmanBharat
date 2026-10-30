@@ -264,3 +264,5 @@ bandit -r services/ shared/ ai_ml/ -ll
 <!-- note: ensure virtual environment is activated before running tests -->
 
 <!-- health checks available at /health on all microservices -->
+
+<!-- Microservices Architecture Note: All service-to-service RPC calls enforce mTLS and token introspection. -->
