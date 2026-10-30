@@ -18,3 +18,6 @@ Please report security issues to security@ayushman.gov.in
 
 ### Data Retention and Erasure
 Personal health data and diagnostic telemetry must strictly follow statutory retention schedules and right-to-be-forgotten deletion workflows per DPDP directives.
+
+### Audit Trail Integrity
+All access logs for patient demographic and electronic health records must be cryptographically hashed and stored in append-only storage.
