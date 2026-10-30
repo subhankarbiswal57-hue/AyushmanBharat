@@ -200,3 +200,9 @@ def validate_pulse_rate(bpm: int) -> ValidResult:
     if not (30 <= val <= 250):
         return False, f'Pulse rate {val} bpm is outside physiological range (30-250 bpm).'
     return True, None
+
+def validate_respiratory_rate(rpm: float) -> bool:
+    """Validate respiratory rate in breaths per minute (healthy range 8 to 60)."""
+    if isinstance(rpm, bool):
+        return False
+    return isinstance(rpm, (int, float)) and 8.0 <= float(rpm) <= 60.0
